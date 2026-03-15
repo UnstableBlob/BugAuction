@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #0a0a0a;
+    color: #c0ffc0;
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #111; }
+  ::-webkit-scrollbar-thumb { background: #00aa29; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #00ff41; }
+}
+
+@layer components {
+  .terminal-card {
+    @apply bg-terminal-surface border border-terminal-border rounded-lg p-6;
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.05), inset 0 1px 0 rgba(0, 255, 65, 0.1);
+  }
+
+  .terminal-input {
+    @apply w-full bg-black border border-terminal-border text-terminal-green px-4 py-2 rounded
+           focus:outline-none focus:border-terminal-green focus:shadow-glow
+           placeholder-terminal-muted transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-transparent border border-terminal-green text-terminal-green px-6 py-2 rounded
+           hover:bg-terminal-green hover:text-black font-mono font-bold
+           transition-all duration-200 cursor-pointer uppercase tracking-widest text-sm;
+  }
+
+  .btn-danger {
+    @apply bg-transparent border border-terminal-red text-terminal-red px-6 py-2 rounded
+           hover:bg-terminal-red hover:text-black font-mono font-bold
+           transition-all duration-200 cursor-pointer uppercase tracking-widest text-sm;
+  }
+
+  .btn-amber {
+    @apply bg-transparent border border-terminal-amber text-terminal-amber px-6 py-2 rounded
+           hover:bg-terminal-amber hover:text-black font-mono font-bold
+           transition-all duration-200 cursor-pointer uppercase tracking-widest text-sm;
+  }
+
+  .status-badge {
+    @apply text-xs px-2 py-0.5 rounded border font-mono uppercase tracking-wider;
+  }
+
+  .status-waiting  { @apply status-badge border-terminal-amber text-terminal-amber; }
+  .status-playing  { @apply status-badge border-terminal-green text-terminal-green; }
+  .status-success  { @apply status-badge border-terminal-green text-terminal-green; box-shadow: 0 0 6px #00ff41; }
+  .status-caught   { @apply status-badge border-terminal-red text-terminal-red; }
+  .status-inactive { @apply status-badge border-terminal-muted text-terminal-muted; }
+
+  .glow-text {
+    text-shadow: 0 0 10px #00ff41, 0 0 20px #00aa29;
+  }
+
+  .terminal-header {
+    @apply text-terminal-green text-xs uppercase tracking-widest border-b border-terminal-border pb-2 mb-4;
+  }
+}

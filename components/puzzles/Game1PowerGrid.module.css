@@ -1,0 +1,461 @@
+.container {
+    background-color: #0a0a0f;
+    color: #fff;
+    font-family: inherit;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #333;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.title {
+    color: #0ff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    margin: 0;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-align: center;
+}
+
+.subtitle {
+    color: #aaa;
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.circuitBoard {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    aspect-ratio: 2 / 1;
+    background: #111;
+    border: 2px solid #222;
+    border-radius: 8px;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+    overflow: hidden;
+}
+
+.wiresContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.wire {
+    fill: none;
+    stroke: #333;
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke 0.4s ease, filter 0.4s ease;
+}
+
+.wire.active {
+    stroke: #0ff;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.8));
+}
+
+.wire.success {
+    stroke: #73ff00;
+    filter: drop-shadow(0 0 10px rgba(115, 255, 0, 0.8));
+}
+
+.wire.error {
+    stroke: #ff0044;
+    filter: drop-shadow(0 0 10px rgba(255, 0, 68, 0.8));
+    animation: wireErrorPulse 1s infinite alternate;
+}
+
+@keyframes wireErrorPulse {
+    0% {
+        filter: drop-shadow(0 0 5px rgba(255, 0, 68, 0.5));
+        stroke: #cc0033;
+    }
+
+    100% {
+        filter: drop-shadow(0 0 15px rgba(255, 0, 68, 1));
+        stroke: #ff0044;
+    }
+}
+
+.nodeAbsolute {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nodeIn1 {
+    left: 12.5%;
+    top: 25%;
+}
+
+.nodeIn2 {
+    left: 12.5%;
+    top: 50%;
+}
+
+.nodeIn3 {
+    left: 12.5%;
+    top: 75%;
+}
+
+.nodeZ1 {
+    left: 43.75%;
+    top: 37.5%;
+}
+
+.nodeZ2 {
+    left: 68.75%;
+    top: 56.25%;
+}
+
+.nodeOut {
+    left: 93.75%;
+    top: 56.25%;
+}
+
+/* Switch */
+.switchWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.switch {
+    width: 60px;
+    height: 30px;
+    background: #222;
+    border-radius: 15px;
+    position: relative;
+    cursor: pointer;
+    border: 2px solid #555;
+    transition: all 0.3s ease;
+}
+
+.switch.on {
+    border-color: #0ff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+    background: #002222;
+}
+
+.switchHandle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    background: #777;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.switch.on .switchHandle {
+    left: 32px;
+    background: #0ff;
+    box-shadow: 0 0 10px #0ff;
+}
+
+.nodeLabel {
+    font-size: 0.85rem;
+    color: #888;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.labelOn {
+    color: #0ff;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+}
+
+/* Drop Zone */
+.dropZoneWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.dropZone {
+    width: 90px;
+    height: 60px;
+    border: 2px dashed #555;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.6);
+    user-select: none;
+}
+
+.dropZone:not(.filled):hover {
+    border-color: #0ff;
+    color: #0ff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+.dropZone.filled {
+    border-style: solid;
+    border-color: #ff00ff;
+    color: #ff00ff;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.3), inset 0 0 10px rgba(255, 0, 255, 0.1);
+    text-shadow: 0 0 8px #ff00ff;
+    background: rgba(255, 0, 255, 0.1);
+    cursor: pointer;
+}
+
+.dropZone.filled:hover {
+    background: rgba(255, 0, 255, 0.2);
+    border-color: #ff33ff;
+}
+
+.removeHint {
+    font-size: 0.65rem;
+    color: #ff00ff;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Output Node */
+.outputWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.outputBulb {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #222;
+    border: 3px solid #555;
+    transition: all 0.5s ease;
+}
+
+.outputBulb.success {
+    background: #73ff00;
+    border-color: #73ff00;
+    box-shadow: 0 0 20px rgba(115, 255, 0, 0.8), 0 0 40px rgba(115, 255, 0, 0.5);
+}
+
+.outputBulb.error {
+    background: #ff0044;
+    border-color: #ff0044;
+    box-shadow: 0 0 20px rgba(255, 0, 68, 0.8);
+    animation: pulseErrorBg 1s infinite alternate;
+}
+
+@keyframes pulseErrorBg {
+    0% {
+        background: #aa0022;
+        border-color: #aa0022;
+        box-shadow: 0 0 10px rgba(255, 0, 68, 0.4);
+    }
+
+    100% {
+        background: #ff0044;
+        border-color: #ff0044;
+        box-shadow: 0 0 30px rgba(255, 0, 68, 0.9);
+    }
+}
+
+.successText {
+    color: #73ff00;
+    text-shadow: 0 0 5px rgba(115, 255, 0, 0.8);
+}
+
+.errorText {
+    color: #ff0044;
+    text-shadow: 0 0 5px rgba(255, 0, 68, 0.8);
+}
+
+/* Status Message */
+.statusSection {
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.statusMessage {
+    font-size: 1.2rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #555;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.statusMessage.successMsg {
+    color: #73ff00;
+    text-shadow: 0 0 10px rgba(115, 255, 0, 0.8);
+    animation: flickerStatus 2s infinite;
+}
+
+.statusMessage.errorMsg {
+    color: #ff0044;
+    text-shadow: 0 0 10px rgba(255, 0, 68, 0.8);
+}
+
+@keyframes flickerStatus {
+
+    0%,
+    18%,
+    22%,
+    25%,
+    53%,
+    57%,
+    100% {
+        opacity: 1;
+        text-shadow: 0 0 10px rgba(115, 255, 0, 0.8);
+    }
+
+    20%,
+    24%,
+    55% {
+        opacity: 0.5;
+        text-shadow: none;
+    }
+}
+
+/* Palette */
+.palette {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: #15151e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.gateBtn {
+    background: #2a2a35;
+    color: #eee;
+    border: 2px solid #555;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    cursor: grab;
+    font-weight: bold;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.gateBtn:active {
+    cursor: grabbing;
+    transform: scale(0.95);
+}
+
+.gateBtn:hover {
+    background: #333;
+    border-color: #ff00ff;
+    color: #ff00ff;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Complete Button */
+.completeBtn {
+    margin-top: 1rem;
+    background: rgba(0, 255, 255, 0.1);
+    color: #0ff;
+    border: 2px solid #0ff;
+    padding: 1rem 3rem;
+    border-radius: 30px;
+    font-family: inherit;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+    animation: buttonPulse 2s infinite;
+}
+
+.completeBtn:hover {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+    transform: translateY(-2px);
+}
+
+@keyframes buttonPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 15px rgba(0, 255, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 255, 255, 0);
+    }
+}
+
+@media (max-width: 600px) {
+    .circuitBoard {
+        aspect-ratio: auto;
+        height: 400px;
+    }
+
+    .nodeIn1 {
+        left: 15%;
+    }
+
+    .nodeIn2 {
+        left: 15%;
+    }
+
+    .nodeIn3 {
+        left: 15%;
+    }
+
+    .nodeZ1 {
+        left: 50%;
+        top: 30%;
+    }
+
+    .nodeZ2 {
+        left: 50%;
+        top: 65%;
+    }
+
+    .nodeOut {
+        left: 85%;
+        top: 50%;
+    }
+
+    .wire {
+        display: none;
+        /* simple fallback for mobile to just show nodes */
+    }
+}

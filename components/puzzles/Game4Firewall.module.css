@@ -1,0 +1,325 @@
+.container {
+    background-color: #030508;
+    color: #4db8ff;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    height: 550px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 2px solid #002233;
+    box-shadow: inset 0 0 50px rgba(0, 30, 60, 0.8), 0 0 20px rgba(0, 100, 200, 0.2);
+
+    /* Background grid lines */
+    background-image:
+        linear-gradient(rgba(0, 100, 200, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 100, 200, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+.shakeRed {
+    animation: shakeError 0.4s cubic-bezier(.36, .07, .19, .97) both;
+    box-shadow: inset 0 0 80px rgba(255, 0, 0, 0.6), 0 0 40px rgba(255, 0, 0, 0.4);
+    border-color: #ff0000;
+}
+
+@keyframes shakeError {
+
+    10%,
+    90% {
+        transform: translate3d(-2px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(4px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-8px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(8px, 0, 0);
+    }
+}
+
+.hudWrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 10;
+}
+
+.title {
+    font-size: 2.5rem;
+    color: #00ffff;
+    letter-spacing: 4px;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.failedTitle {
+    font-size: 2.5rem;
+    color: #ff3333;
+    letter-spacing: 4px;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+}
+
+.successTitle {
+    font-size: 2.5rem;
+    color: #33ff00;
+    letter-spacing: 4px;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 15px rgba(51, 255, 0, 0.8);
+}
+
+.brief {
+    color: #6699bb;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 500px;
+}
+
+.initBtn,
+.proceedBtn {
+    background: transparent;
+    border: 2px solid #00ffff;
+    color: #00ffff;
+    padding: 0.8rem 2rem;
+    font-family: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.initBtn:hover {
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+
+.proceedBtn {
+    border-color: #33ff00;
+    color: #33ff00;
+}
+
+.proceedBtn:hover {
+    background: rgba(51, 255, 0, 0.1);
+    box-shadow: 0 0 20px rgba(51, 255, 0, 0.4);
+}
+
+/* Gameplay HUD */
+.topHud,
+.bottomHud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(77, 184, 255, 0.3);
+    padding-bottom: 0.5rem;
+}
+
+.bottomHud {
+    border-bottom: none;
+    border-top: 1px solid rgba(77, 184, 255, 0.3);
+    padding-bottom: 0;
+    padding-top: 0.5rem;
+}
+
+.hudText {
+    font-size: 0.9rem;
+    color: #4db8ff;
+    letter-spacing: 2px;
+}
+
+.timer {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #00ffff;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+    transition: color 0.3s ease;
+}
+
+.timerAlert {
+    color: #ff3333;
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+    animation: flashTimer 1s infinite alternate;
+}
+
+@keyframes flashTimer {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.5;
+    }
+}
+
+.radarLayout {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.sensorGrid {
+    display: grid;
+    grid-template-columns: 80px 140px 80px;
+    grid-template-rows: 80px 140px 80px;
+    align-items: center;
+    justify-items: center;
+}
+
+.emptyCell {
+    width: 100%;
+    height: 100%;
+}
+
+.sensorBox {
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(77, 184, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: rgba(77, 184, 255, 0.5);
+    background: rgba(0, 30, 60, 0.5);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.sensorAlert {
+    border-color: #ff3333;
+    color: #ff3333;
+    background: rgba(255, 0, 0, 0.1);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.6), inset 0 0 10px rgba(255, 0, 0, 0.3);
+    text-shadow: 0 0 5px #ff3333;
+}
+
+.centerPos {
+    width: 140px;
+    height: 140px;
+    border: 3px solid #00ffff;
+    background: rgba(0, 255, 255, 0.05);
+    box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.2), 0 0 15px rgba(0, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Rotating radar sweep effect */
+.centerPos::after {
+    content: " ";
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    top: 0;
+    left: 50%;
+    transform-origin: bottom left;
+    background: linear-gradient(to right, transparent, rgba(0, 255, 255, 0.4));
+    animation: radarSweep 3s linear infinite;
+    pointer-events: none;
+    border-radius: 0 100% 0 0;
+}
+
+@keyframes radarSweep {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.posLabel {
+    font-size: 1rem;
+    color: #4db8ff;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+}
+
+.posValue {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 0 0 5px #00ffff;
+}
+
+/* D-Pad */
+.dpad {
+    display: grid;
+    grid-template-columns: 60px 60px 60px;
+    grid-template-rows: 60px 60px 60px;
+    gap: 8px;
+    background: rgba(0, 10, 20, 0.5);
+    padding: 1rem;
+    border-radius: 50%;
+    border: 2px solid rgba(77, 184, 255, 0.2);
+}
+
+.emptyKey {
+    width: 100%;
+    height: 100%;
+}
+
+.keyBtnCenter {
+    background: #002233;
+    border-radius: 10%;
+}
+
+.keyBtn {
+    background: #00334d;
+    border: 2px solid #005580;
+    color: #00ffff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s;
+    box-shadow: 0 4px 0 #00111a;
+}
+
+.keyBtn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #00111a;
+    background: #004466;
+    border-color: #00ffff;
+}
+
+@media (max-width: 600px) {
+    .radarLayout {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .sensorGrid {
+        transform: scale(0.8);
+    }
+
+    .dpad {
+        transform: scale(0.8);
+    }
+}
