@@ -85,7 +85,7 @@ export async function POST(req) {
             { _id: t._id, status: "waiting" },
             {
               $set: {
-                status: "playing",
+                status: "auctioning",
                 // Notice we do NOT overwrite their assignedPuzzleIds!
                 // they keep what the admin explicitly allotted them.
                 currentIndex: 0,
@@ -121,7 +121,7 @@ export async function POST(req) {
       const res = await Team.findOneAndUpdate(
         { _id: t._id, status: "waiting" },
         {
-          status: "playing",
+          status: "auctioning",
           currentIndex: 0,
           solvedPuzzleIds: [],
           penaltySeconds: 0,

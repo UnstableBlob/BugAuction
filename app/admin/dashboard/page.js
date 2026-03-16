@@ -39,6 +39,10 @@ export default function AdminDashboard() {
   const [eventLog, setEventLog] = useState([]);
   const [sessionTimer, setSessionTimer] = useState(null);
 
+  // Auction State
+  const [activeAuction, setActiveAuction] = useState(null);
+  const [auctionPuzzleId, setAuctionPuzzleId] = useState("");
+
   // Modal State for Puzzle Allotment
   const [showAssignModal, setShowAssignModal] = useState(null); // stores the team object
   const [tempAssignedIds, setTempAssignedIds] = useState([]);
@@ -60,6 +64,15 @@ export default function AdminDashboard() {
         const lbData = await lbRes.json();
         setLeaderboard(lbData.leaderboard || []);
         if (lbData.session) setSession(lbData.session);
+      }
+
+      // Fetch active auction
+      const auctionRes = await fetch("/api/admin/auction/current");
+      if (auctionRes.ok) {
+         const auctionData = await auctionRes.json();
+         setActiveAuction(auctionData.auction || null);
+      } else {
+         setActiveAuction(null);
       }
     } catch {
       /* network, retry */
@@ -337,6 +350,86 @@ export default function AdminDashboard() {
     setLoading(false);
   }
 
+  // ==== Auction Logic ====
+  async function startAuction() {
+    if (!session || !session._id) {
+       setMsg("Error: Start a session first before auctioning.");
+       return;
+    }
+    if (!auctionPuzzleId) {
+      setMsg("Error: Select a puzzle to auction.");
+      return;
+    }
+    setLoading(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/auction/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: session._id,
+          puzzleId: auctionPuzzleId,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMsg("Error: " + data.error);
+      } else {
+        setMsg("✓ Auction started");
+        fetchData();
+      }
+    } catch (e) {
+      setMsg("Network error");
+    }
+    setLoading(false);
+  }
+
+  async function closeAuction() {
+    if (!activeAuction) return;
+    setLoading(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/auction/close", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ auctionId: activeAuction._id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMsg("Error: " + data.error);
+      } else {
+        setMsg("✓ Auction closed");
+        fetchData();
+      }
+    } catch (e) {
+      setMsg("Network error");
+    }
+    setLoading(false);
+  }
+
+  async function startGamePhase() {
+    if (!session || !session._id) return;
+    setLoading(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/session/start-game", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: session._id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMsg("Error: " + data.error);
+      } else {
+        setMsg("✓ Game Phase Started");
+        fetchData();
+      }
+    } catch {
+      setMsg("Network error");
+    }
+    setLoading(false);
+  }
+
   const waitingTeams = teams.filter((t) => t.status === "waiting");
   const playingTeams = teams.filter((t) =>
     ["playing", "success", "caught"].includes(t.status),
@@ -451,11 +544,69 @@ export default function AdminDashboard() {
             <button onClick={startSession} disabled={loading} className="btn-amber w-full disabled:opacity-30">{loading ? "STARTING..." : "▶ START SESSION"}</button>
             <div className="text-terminal-muted text-xs mt-2">Active session: {session && session._id ? session._id.toString().slice(-8) : 'none'}</div>
             <div className="mt-2">
+              <button onClick={startGamePhase} disabled={!session || session.status !== 'started'} className="btn-amber w-full border-green-500 !text-green-500 disabled:opacity-30">▶ START PLAYING PHASE</button>
+            </div>
+            <div className="mt-2">
               <button onClick={stopSession} disabled={!session || session.status !== 'started'} className="btn-primary w-full disabled:opacity-30">STOP SESSION</button>
             </div>
             <div className="mt-2">
               <button onClick={clearSession} className="btn-amber w-full">CLEAR TEAMS & SESSIONS</button>
             </div>
+          </div>
+
+          {/* Auction Management */}
+          <div className="terminal-card space-y-3 border-amber-500/50">
+            <div className="terminal-header text-amber-500">Auction Management</div>
+            <div className="text-terminal-muted text-xs mb-2">
+               Manage silent auctions for puzzles. Requires an active session.
+            </div>
+            {!activeAuction ? (
+              <>
+                 <label className="text-terminal-muted text-xs block mb-1">Select Puzzle</label>
+                 <select 
+                    value={auctionPuzzleId} 
+                    onChange={(e) => setAuctionPuzzleId(e.target.value)}
+                    className="terminal-input w-full bg-black mb-2"
+                 >
+                    <option value="">-- Choose Priority Puzzle --</option>
+                    {allPuzzles.map(p => (
+                       <option key={p.puzzleId} value={p.puzzleId}>
+                          {p.title} ({p.puzzleId})
+                       </option>
+                    ))}
+                 </select>
+                 <button 
+                    onClick={startAuction} 
+                    disabled={loading || !session || session.status !== 'started'} 
+                    className="btn-amber w-full disabled:opacity-30"
+                 >
+                    {loading ? "PROCESSING..." : "BIDDING: OPEN AUCTION"}
+                 </button>
+              </>
+            ) : (
+               <>
+                 <div className="p-2 border border-terminal-green/30 bg-green-950/20 mb-2 rounded">
+                    <div className="text-terminal-amber font-bold text-sm mb-1">
+                       Active: {allPuzzles.find(p => p.puzzleId === activeAuction.puzzleId)?.title || activeAuction.puzzleId}
+                    </div>
+                    <div className="text-terminal-muted text-xs mb-1">
+                       Bids received: {activeAuction.bids?.length || 0}
+                    </div>
+                    {activeAuction.bids && activeAuction.bids.length > 0 && (
+                      <div className="text-terminal-green text-xs font-bold">
+                         Top bid so far: {Math.max(...activeAuction.bids.map(b => b.amount))}
+                      </div>
+                    )}
+                 </div>
+                 <button 
+                    onClick={closeAuction} 
+                    disabled={loading} 
+                    className="btn-primary w-full disabled:opacity-30 !bg-red-900 !text-white hover:!bg-red-800"
+                 >
+                    {loading ? "PROCESSING..." : "CLOSE AUCTION & AWARD PUZZLE"}
+                 </button>
+               </>
+            )}
           </div>
 
           {/* Live Event Terminal */}

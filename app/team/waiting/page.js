@@ -33,6 +33,8 @@ export default function WaitingPage() {
         const data = await res.json();
         if (data.status === "playing" || data.shouldRedirect === "/team/game") {
           router.push("/team/game");
+        } else if (data.status === "auctioning") {
+          router.push("/team/auction");
         } else if (data.status === "success") {
           router.push("/team/success");
         } else if (data.status === "caught") {

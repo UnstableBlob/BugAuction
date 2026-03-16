@@ -44,6 +44,10 @@ export default function GamePage() {
         router.push("/team/waiting");
         return;
       }
+      if (data.status === "auctioning") {
+        router.push("/team/auction");
+        return;
+      }
       // 'loading': puzzles not ready yet (late-join race condition) — stay and retry
       if (data.status === "loading") {
         return;

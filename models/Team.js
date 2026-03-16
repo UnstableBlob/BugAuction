@@ -8,9 +8,10 @@ const TeamSchema = new mongoose.Schema(
     tid: { type: Number, unique: true, sparse: true },
     status: {
       type: String,
-      enum: ["inactive", "waiting", "playing", "success", "caught"],
+      enum: ["inactive", "waiting", "auctioning", "playing", "success", "caught"],
       default: "inactive",
     },
+    currency: { type: Number, default: 1000 },
     activeRoomId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Room",
