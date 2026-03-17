@@ -2,11 +2,9 @@ import { NextResponse } from 'next/server';
 import { getTeamFromRequest } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import Session from '@/models/Session';
-import Puzzle from '@/models/Puzzle';
 import Team from '@/models/Team';
 import { getCache, setCache } from '@/lib/cache';
-
-
+import { getPuzzleById } from '@/lib/puzzles';
 
 export async function GET(req) {
     try {
@@ -67,11 +65,7 @@ export async function GET(req) {
         }
 
         const puzzleId = freshTeam.assignedPuzzleIds[freshTeam.currentIndex];
-        let puzzle = getCache(`puzzle_${puzzleId}`);
-        if (!puzzle) {
-            puzzle = await Puzzle.findOne({ puzzleId }).lean();
-            if (puzzle) setCache(`puzzle_${puzzleId}`, puzzle, 3600); // Puzzles don't change, cache for 1 hour
-        }
+        const puzzle = getPuzzleById(puzzleId);
         
         if (!puzzle) {
             return NextResponse.json({ status: 'loading' });
@@ -85,11 +79,13 @@ export async function GET(req) {
             currentIndex: freshTeam.currentIndex,
             totalPuzzles: freshTeam.assignedPuzzleIds.length,
             solvedCount: (freshTeam.solvedPuzzleIds || []).length,
+            score: freshTeam.score || 0,
             puzzle: {
                 puzzleId: puzzle.puzzleId,
                 type: puzzle.type,
                 title: puzzle.title,
                 prompt: puzzle.prompt,
+                points: puzzle.points,
                 uiConfig: puzzle.uiConfig,
             },
             isSolved,

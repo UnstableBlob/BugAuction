@@ -21,6 +21,8 @@ async function main() {
         prompt: { type: String, required: true },
         uiConfig: { type: mongoose.Schema.Types.Mixed, default: {} },
         answer: { type: mongoose.Schema.Types.Mixed, required: true },
+        points: { type: Number, default: 0 },
+        basePrice: { type: Number, default: 0 },
         penaltySecondsOnWrong: { type: Number, default: 300 },
     });
     const Puzzle = mongoose.models.Puzzle || mongoose.model('Puzzle', PuzzleSchema);
@@ -36,6 +38,8 @@ async function main() {
         title: folder,
         prompt: `Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: "${folder}".`,
         answer: folder,
+        points: Math.floor(Math.random() * (500 - 100 + 1)) + 100, // Random points between 100 and 500
+        basePrice: Math.floor(Math.random() * (200 - 50 + 1)) + 50, // Random base price between 50 and 200
         penaltySecondsOnWrong: 300,
         uiConfig: {
             downloadUrl: `/bugs/${folder}.zip` // We'll move them to public/bugs/
@@ -48,7 +52,17 @@ async function main() {
 
     console.log('Inserting bug puzzles...');
     await Puzzle.insertMany(puzzles);
-    console.log('Bug puzzles inserted successfully.');
+    console.log('Bug puzzles inserted successfully successfully into DB.');
+
+    // --- NEW: Write to JSON file ---
+    const DATA_DIR = path.join(process.cwd(), 'data');
+    if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR);
+    }
+    const JSON_PATH = path.join(DATA_DIR, 'puzzles.json');
+    fs.writeFileSync(JSON_PATH, JSON.stringify(puzzles, null, 2));
+    console.log(`Successfully wrote ${puzzles.length} puzzles to ${JSON_PATH}`);
+    // -------------------------------
 
     await mongoose.disconnect();
     console.log('Disconnected.');

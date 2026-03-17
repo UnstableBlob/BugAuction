@@ -1,0 +1,288 @@
+[
+  {
+    "puzzleId": "BUG-01",
+    "type": "logic",
+    "title": "empty_input",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"empty_input\".",
+    "answer": "empty_input",
+    "points": 474,
+    "basePrice": 101,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/empty_input.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-02",
+    "type": "logic",
+    "title": "global_instead_of_local",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"global_instead_of_local\".",
+    "answer": "global_instead_of_local",
+    "points": 448,
+    "basePrice": 123,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/global_instead_of_local.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-03",
+    "type": "logic",
+    "title": "incorrect_arguments",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"incorrect_arguments\".",
+    "answer": "incorrect_arguments",
+    "points": 281,
+    "basePrice": 100,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/incorrect_arguments.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-04",
+    "type": "logic",
+    "title": "incorrect_default_value",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"incorrect_default_value\".",
+    "answer": "incorrect_default_value",
+    "points": 340,
+    "basePrice": 56,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/incorrect_default_value.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-05",
+    "type": "logic",
+    "title": "incorrect_recursion_termination",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"incorrect_recursion_termination\".",
+    "answer": "incorrect_recursion_termination",
+    "points": 115,
+    "basePrice": 120,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/incorrect_recursion_termination.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-06",
+    "type": "logic",
+    "title": "incorrect_scope",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"incorrect_scope\".",
+    "answer": "incorrect_scope",
+    "points": 320,
+    "basePrice": 169,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/incorrect_scope.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-07",
+    "type": "logic",
+    "title": "incorrect_serialization",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"incorrect_serialization\".",
+    "answer": "incorrect_serialization",
+    "points": 205,
+    "basePrice": 90,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/incorrect_serialization.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-08",
+    "type": "logic",
+    "title": "malformed_data",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"malformed_data\".",
+    "answer": "malformed_data",
+    "points": 255,
+    "basePrice": 58,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/malformed_data.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-09",
+    "type": "logic",
+    "title": "missing_break_condition",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"missing_break_condition\".",
+    "answer": "missing_break_condition",
+    "points": 380,
+    "basePrice": 195,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/missing_break_condition.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-10",
+    "type": "logic",
+    "title": "modifying_immutable",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"modifying_immutable\".",
+    "answer": "modifying_immutable",
+    "points": 243,
+    "basePrice": 106,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/modifying_immutable.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-11",
+    "type": "logic",
+    "title": "no_base_case",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"no_base_case\".",
+    "answer": "no_base_case",
+    "points": 472,
+    "basePrice": 128,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/no_base_case.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-12",
+    "type": "logic",
+    "title": "null_undefined_value",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"null_undefined_value\".",
+    "answer": "null_undefined_value",
+    "points": 148,
+    "basePrice": 91,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/null_undefined_value.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-13",
+    "type": "logic",
+    "title": "overwrite_accidentally",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"overwrite_accidentally\".",
+    "answer": "overwrite_accidentally",
+    "points": 368,
+    "basePrice": 113,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/overwrite_accidentally.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-14",
+    "type": "logic",
+    "title": "premature_loop_exit",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"premature_loop_exit\".",
+    "answer": "premature_loop_exit",
+    "points": 400,
+    "basePrice": 182,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/premature_loop_exit.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-15",
+    "type": "logic",
+    "title": "read_before_assignment",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"read_before_assignment\".",
+    "answer": "read_before_assignment",
+    "points": 414,
+    "basePrice": 189,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/read_before_assignment.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-16",
+    "type": "logic",
+    "title": "reusing_loop_variable",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"reusing_loop_variable\".",
+    "answer": "reusing_loop_variable",
+    "points": 486,
+    "basePrice": 103,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/reusing_loop_variable.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-17",
+    "type": "logic",
+    "title": "stale_cached_value",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"stale_cached_value\".",
+    "answer": "stale_cached_value",
+    "points": 424,
+    "basePrice": 132,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/stale_cached_value.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-18",
+    "type": "logic",
+    "title": "type_mismatch",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"type_mismatch\".",
+    "answer": "type_mismatch",
+    "points": 225,
+    "basePrice": 91,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/type_mismatch.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-19",
+    "type": "logic",
+    "title": "uninitialized_error",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"uninitialized_error\".",
+    "answer": "uninitialized_error",
+    "points": 281,
+    "basePrice": 55,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/uninitialized_error.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-20",
+    "type": "logic",
+    "title": "uninitialized_variable",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"uninitialized_variable\".",
+    "answer": "uninitialized_variable",
+    "points": 170,
+    "basePrice": 138,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/uninitialized_variable.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-21",
+    "type": "logic",
+    "title": "variable_shadowing",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"variable_shadowing\".",
+    "answer": "variable_shadowing",
+    "points": 268,
+    "basePrice": 138,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/variable_shadowing.zip"
+    }
+  },
+  {
+    "puzzleId": "BUG-22",
+    "type": "logic",
+    "title": "yaml_issue",
+    "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"yaml_issue\".",
+    "answer": "yaml_issue",
+    "points": 335,
+    "basePrice": 157,
+    "penaltySecondsOnWrong": 300,
+    "uiConfig": {
+      "downloadUrl": "/bugs/yaml_issue.zip"
+    }
+  }
+]

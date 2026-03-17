@@ -169,13 +169,13 @@ export default function GamePage() {
   return (
     <main className="min-h-screen p-4 max-w-4xl mx-auto">
       {/* Top HUD */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div className="terminal-card text-center">
           <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">
             Time Elapsed
           </div>
           <div
-            className={`text-2xl font-bold text-terminal-green`}
+            className={`text-xl md:text-2xl font-bold text-terminal-green`}
           >
             {formatTime(state.timeSinceStart)}
           </div>
@@ -194,6 +194,14 @@ export default function GamePage() {
           </div>
           <div className="text-terminal-green text-xl font-bold">
             {state.solvedCount} / {state.totalPuzzles}
+          </div>
+        </div>
+        <div className="terminal-card text-center border-amber-500/30">
+          <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">
+            Total Score
+          </div>
+          <div className="text-terminal-amber text-xl font-bold">
+            {state.score || 0} <span className="text-[10px]">PTS</span>
           </div>
         </div>
       </div>
@@ -217,9 +225,14 @@ export default function GamePage() {
                 </span>
               )}
             </div>
-            <h2 className="text-terminal-green text-xl font-bold mb-4">
-              {state.puzzle.title}
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+               <h2 className="text-terminal-green text-xl font-bold">
+                 {state.puzzle.title}
+               </h2>
+               <div className="text-[10px] font-bold px-2 py-0.5 bg-green-500/10 text-green-500 border border-green-500/20 rounded uppercase tracking-tighter">
+                  Reward: {state.puzzle.points} PTS
+               </div>
+            </div>
             <p className="text-terminal-text text-sm mb-6 whitespace-pre-wrap leading-relaxed">
               {state.puzzle.prompt}
             </p>

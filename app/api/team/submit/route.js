@@ -2,15 +2,7 @@ import { NextResponse } from 'next/server';
 import { getTeamFromRequest } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
-import Puzzle from '@/models/Puzzle';
-
-function answersMatch(correctAnswer, submittedAnswer) {
-    const normalize = (v) => String(v).trim().toLowerCase();
-    if (typeof correctAnswer === 'object' && correctAnswer !== null) {
-        return normalize(JSON.stringify(correctAnswer)) === normalize(JSON.stringify(submittedAnswer));
-    }
-    return normalize(correctAnswer) === normalize(submittedAnswer);
-}
+import { getPuzzleById, checkAnswer } from '@/lib/puzzles';
 
 export async function POST(req) {
     try {
@@ -28,8 +20,7 @@ export async function POST(req) {
             return NextResponse.json({ error: 'Puzzle not assigned to your team' }, { status: 403 });
         }
 
-        await connectDB();
-        const puzzle = await Puzzle.findOne({ puzzleId });
+        const puzzle = getPuzzleById(puzzleId);
         if (!puzzle) return NextResponse.json({ error: 'Puzzle not found' }, { status: 404 });
 
         // Already solved?
@@ -37,7 +28,7 @@ export async function POST(req) {
             return NextResponse.json({ correct: true, message: 'Already solved!', alreadySolved: true });
         }
 
-        const isCorrect = answersMatch(puzzle.answer, answer);
+        const { correct: isCorrect } = checkAnswer(puzzleId, answer);
 
         if (isCorrect) {
             const newSolved = [...team.solvedPuzzleIds, puzzleId];
@@ -45,6 +36,7 @@ export async function POST(req) {
             let dbUpdate = {
                 solvedPuzzleIds: newSolved,
                 status: allSolved ? 'success' : 'playing',
+                $inc: { score: puzzle.points || 0 },
                 $push: {
                     submissionHistory: {
                         puzzleId,

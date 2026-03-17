@@ -12,6 +12,7 @@ const TeamSchema = new mongoose.Schema(
       default: "inactive",
     },
     currency: { type: Number, default: 1000 },
+    score: { type: Number, default: 0 },
     activeRoomId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Room",

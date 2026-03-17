@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Auction from "@/models/Auction";
 import Session from "@/models/Session";
-import Puzzle from "@/models/Puzzle";
+import { getPuzzleById } from "@/lib/puzzles";
 
 export async function POST(req) {
   try {
@@ -24,7 +24,7 @@ export async function POST(req) {
     }
 
     // Check if puzzle exists
-    const puzzle = await Puzzle.findOne({ puzzleId });
+    const puzzle = getPuzzleById(puzzleId);
     if (!puzzle) {
       return NextResponse.json({ error: "Puzzle not found" }, { status: 404 });
     }

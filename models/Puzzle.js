@@ -12,6 +12,8 @@ const PuzzleSchema = new mongoose.Schema(
         prompt: { type: String, required: true },
         uiConfig: { type: mongoose.Schema.Types.Mixed, default: {} },
         answer: { type: mongoose.Schema.Types.Mixed, required: true },
+        points: { type: Number, default: 0 },
+        basePrice: { type: Number, default: 0 },
         penaltySecondsOnWrong: { type: Number, default: 300 },
     },
     { timestamps: true }
