@@ -59,7 +59,7 @@ export default function GamePage() {
         return;
       }
       // Only set state when we have full game data
-      if (data.status === "playing" && data.puzzle && typeof data.timeLeft === "number") {
+      if (data.status === "playing" && data.puzzle) {
         setState(data);
       }
     }

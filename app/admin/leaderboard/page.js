@@ -51,15 +51,17 @@ export default function AdminLeaderboardPage() {
         }
     }, [lbData]);
 
-    // Countdown timer — tick every second to decrement timeLeft
+    // Live timer — tick every second to increment timeTaken for playing teams
     useEffect(() => {
         if (timerRef.current) clearInterval(timerRef.current);
         timerRef.current = setInterval(() => {
             setLeaderboard((prev) =>
-                prev.map((t) => ({
-                    ...t,
-                    timeLeft: Math.max(0, (t.timeLeft || 0) - 1),
-                }))
+                prev.map((t) => {
+                    if (t.status === "playing") {
+                        return { ...t, timeTaken: (t.timeTaken || 0) + 1 };
+                    }
+                    return t;
+                })
             );
         }, 1000);
         return () => clearInterval(timerRef.current);
@@ -116,10 +118,7 @@ export default function AdminLeaderboardPage() {
                             {session.status?.toUpperCase()}
                         </span>
                     </div>
-                    <div className="text-terminal-muted">
-                        Duration:{" "}
-                        <span className="text-terminal-text">{session.durationMinutes}m</span>
-                    </div>
+
                     <div className="text-terminal-muted">
                         Teams:{" "}
                         <span className="text-terminal-amber font-bold">
@@ -230,18 +229,14 @@ export default function AdminLeaderboardPage() {
                                         <td
                                             className={`px-3 py-3 font-mono text-sm ${t.status === "success"
                                                     ? "text-terminal-green"
-                                                    : (t.timeLeft || 0) > 300
-                                                        ? "text-terminal-green"
-                                                        : (t.timeLeft || 0) > 60
-                                                            ? "text-terminal-amber"
-                                                            : "text-terminal-red"
+                                                    : t.status === "playing"
+                                                        ? "text-terminal-amber"
+                                                        : "text-terminal-muted"
                                                 }`}
                                         >
-                                            {t.status === "success" && t.timeTaken
-                                                ? formatTime(t.timeTaken)
-                                                : t.status === "caught"
-                                                    ? "CAUGHT"
-                                                    : formatTime(t.timeLeft)}
+                                            {t.status === "caught"
+                                                ? "CAUGHT"
+                                                : formatTime(t.timeTaken)}
                                         </td>
                                     </tr>
                                 ))}
@@ -253,7 +248,7 @@ export default function AdminLeaderboardPage() {
 
             {/* Footer hint */}
             <div className="text-terminal-muted text-xs text-center mt-4">
-                Rankings: Most solved → Least penalty → Most time remaining
+                Rankings: Most solved → Least time taken
             </div>
         </main>
     );
