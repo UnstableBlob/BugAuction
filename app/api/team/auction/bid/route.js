@@ -62,14 +62,7 @@ export async function POST(req) {
       );
     }
 
-    // New: Check base price
-    const puzzle = await require("@/models/Puzzle").default.findOne({ puzzleId: auction.puzzleId });
-    if (puzzle && bidAmount < puzzle.basePrice) {
-        return NextResponse.json(
-            { error: `Bid amount must be at least the base price of ${puzzle.basePrice}` },
-            { status: 400 }
-        );
-    }
+
 
     // Check if the team has already bid
     const existingBidIndex = auction.bids.findIndex(

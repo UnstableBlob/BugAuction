@@ -269,12 +269,20 @@ export default function AdminDashboard() {
         </div>
         <div className="flex items-center gap-3">
           {session && (
-            <button
-              onClick={() => router.push("/admin/leaderboard")}
-              className="btn-amber text-xs px-3 py-1"
-            >
-              📊 View Leaderboard
-            </button>
+            <>
+              <button
+                onClick={() => router.push("/admin/assignments")}
+                className="btn-amber text-xs px-3 py-1"
+              >
+                🧩 Puzzle Assignments
+              </button>
+              <button
+                onClick={() => router.push("/admin/leaderboard")}
+                className="btn-amber text-xs px-3 py-1"
+              >
+                📊 View Leaderboard
+              </button>
+            </>
           )}
           <div className="text-terminal-muted text-xs animate-pulse">◌ LIVE</div>
         </div>
@@ -320,7 +328,9 @@ export default function AdminDashboard() {
                     className="terminal-input w-full bg-black mb-2"
                  >
                     <option value="">-- Choose Priority Puzzle --</option>
-                    {allPuzzles.map(p => (
+                    {allPuzzles
+                      .filter(p => !teams.some(t => t.assignedPuzzleIds?.includes(p.puzzleId)))
+                      .map(p => (
                        <option key={p.puzzleId} value={p.puzzleId}>
                           {p.title} ({p.puzzleId})
                        </option>

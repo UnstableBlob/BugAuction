@@ -24,7 +24,6 @@ export async function GET(req) {
 
         const totalPuzzles = (team.assignedPuzzleIds || []).length;
         const solvedCount = (team.solvedPuzzleIds || []).length;
-        const penaltySeconds = team.penaltySeconds || 0;
         const finalStatus = team.finalStatus || team.status;
         const finalScore = team.finalScore != null ? team.finalScore : solvedCount;
 
@@ -70,8 +69,6 @@ export async function GET(req) {
             totalPuzzles,
             solvedCount,
             unsolvedCount: totalPuzzles - solvedCount,
-            penaltySeconds,
-            penaltyMinutes: Math.round(penaltySeconds / 60),
             accuracyPct,
             finalScore,
             timeTakenSeconds,

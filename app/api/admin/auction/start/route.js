@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Auction from "@/models/Auction";
 import Session from "@/models/Session";
+import Team from "@/models/Team";
 import { getPuzzleById } from "@/lib/puzzles";
 
 export async function POST(req) {
@@ -27,6 +28,15 @@ export async function POST(req) {
     const puzzle = getPuzzleById(puzzleId);
     if (!puzzle) {
       return NextResponse.json({ error: "Puzzle not found" }, { status: 404 });
+    }
+
+    // Check if the puzzle is already assigned to a team
+    const assignedTeam = await Team.findOne({ assignedPuzzleIds: puzzleId });
+    if (assignedTeam) {
+      return NextResponse.json(
+        { error: `Puzzle is already assigned to team: ${assignedTeam.teamName}` },
+        { status: 400 }
+      );
     }
 
     // Check if there is already an open auction for this session

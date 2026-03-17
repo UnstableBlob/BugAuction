@@ -100,7 +100,6 @@ export async function POST(req) {
           assignedPuzzleIds: assignments[teamName],
           currentIndex: 0,
           solvedPuzzleIds: [],
-          penaltySeconds: 0,
           activeRoomId: room._id,
           gameStartTime: startTime,
         },

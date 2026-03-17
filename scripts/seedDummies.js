@@ -13,7 +13,6 @@ for (let i = 1; i <= 20; i++) {
     title: `Dummy Puzzle ${i}`,
     prompt: `This is dummy puzzle ${i}. Please enter the correct string to submit.`,
     answer: `answer${i}`,
-    penaltySecondsOnWrong: 60,
   });
 }
 
@@ -24,7 +23,6 @@ const puzzleSchema = new mongoose.Schema({
   title: String,
   prompt: String,
   answer: mongoose.Schema.Types.Mixed,
-  penaltySecondsOnWrong: Number,
 });
 const Puzzle = mongoose.models.Puzzle || mongoose.model("Puzzle", puzzleSchema);
 

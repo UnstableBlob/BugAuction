@@ -19,7 +19,6 @@ const puzzles = [
             ],
         },
         answer: '0',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-02',
@@ -35,7 +34,6 @@ const puzzles = [
             ],
         },
         answer: '0',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-03',
@@ -51,7 +49,6 @@ const puzzles = [
             ],
         },
         answer: 'READY',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-04',
@@ -67,7 +64,6 @@ const puzzles = [
             ],
         },
         answer: '192.168.10.0',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-05',
@@ -83,7 +79,6 @@ const puzzles = [
             ],
         },
         answer: 'O(log n)',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-06',
@@ -99,7 +94,6 @@ const puzzles = [
             ],
         },
         answer: 'TCP',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-07',
@@ -115,7 +109,6 @@ const puzzles = [
             ],
         },
         answer: '0',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-08',
@@ -131,7 +124,6 @@ const puzzles = [
             ],
         },
         answer: 'layer2',
-        penaltySecondsOnWrong: 300,
     },
 
     // ─── HANDSHAKE PUZZLES ────────────────────────────────────────────────────
@@ -142,7 +134,6 @@ const puzzles = [
         prompt: 'Your server receives a TCP SYN packet from a client.\nAccording to the TCP three-way handshake, what should the server send back?\n\nA = Send SYN-ACK\nS = Send RST (reset connection)\nIGNORE = Drop the packet silently',
         uiConfig: { actions: ['A', 'S', 'IGNORE'] },
         answer: 'A',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-10',
@@ -151,7 +142,6 @@ const puzzles = [
         prompt: 'Your switch receives an unsolicited ARP REPLY claiming that 192.168.1.1 maps to a new MAC address. No ARP request was sent.\nThis is a classic ARP poisoning attempt. What do you do?\n\nA = Accept and update ARP table\nS = Block and log the packet\nIGNORE = Do nothing',
         uiConfig: { actions: ['A', 'S', 'IGNORE'] },
         answer: 'S',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-11',
@@ -160,7 +150,6 @@ const puzzles = [
         prompt: 'A production server receives an SSH login request from an IP address not in the whitelist during off-hours.\nWhat is the correct security response?\n\nA = Allow and monitor\nS = Block and alert the security team\nIGNORE = Log and do nothing',
         uiConfig: { actions: ['A', 'S', 'IGNORE'] },
         answer: 'S',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-12',
@@ -169,7 +158,6 @@ const puzzles = [
         prompt: 'During an active TCP session, you receive a packet with the RST flag set.\nWhat is the correct action for a well-behaved TCP stack?\n\nA = Continue sending data normally\nS = Immediately close the connection\nIGNORE = Discard the RST and continue',
         uiConfig: { actions: ['A', 'S', 'IGNORE'] },
         answer: 'S',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-13',
@@ -178,7 +166,6 @@ const puzzles = [
         prompt: 'A host sends an ICMP Echo Request to the broadcast address 255.255.255.255. This is a Smurf attack amplification vector.\nAs the network admin, what do you do at the router?\n\nA = Allow broadcast pings as normal\nS = Block ICMP directed broadcasts at the router\nIGNORE = Monitor but take no action',
         uiConfig: { actions: ['A', 'S', 'IGNORE'] },
         answer: 'S',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-14',
@@ -187,7 +174,6 @@ const puzzles = [
         prompt: 'A client broadcasts a DHCP DISCOVER. The DHCP server sends a DHCP OFFER.\nWhich packet does the client send next in the DORA sequence?\n\nA = DHCP REQUEST\nS = DHCP ACK\nIGNORE = Start over with another DISCOVER',
         uiConfig: { actions: ['A', 'S', 'IGNORE'] },
         answer: 'A',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-15',
@@ -196,7 +182,6 @@ const puzzles = [
         prompt: 'Your server already has an established TCP session with a client. It now receives a duplicate SYN from the same source.\nWhat should the server do according to RFC 793?\n\nA = Send RST to reset the old connection\nS = Send ACK for the existing session\nIGNORE = Drop the duplicate SYN silently',
         uiConfig: { actions: ['A', 'S', 'IGNORE'] },
         answer: 'S',
-        penaltySecondsOnWrong: 300,
     },
 
     // ─── SCHEMA PUZZLES ───────────────────────────────────────────────────────
@@ -228,7 +213,6 @@ const puzzles = [
             ],
         },
         answer: 'student_id',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-17',
@@ -258,7 +242,6 @@ const puzzles = [
             ],
         },
         answer: 'customer_id',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-18',
@@ -288,7 +271,6 @@ const puzzles = [
             ],
         },
         answer: 'manager_id',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-19',
@@ -318,7 +300,6 @@ const puzzles = [
             ],
         },
         answer: 'sku',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-20',
@@ -355,7 +336,6 @@ const puzzles = [
             ],
         },
         answer: 'COURSES.id = ENROLLMENTS.course_id',
-        penaltySecondsOnWrong: 300,
     },
     {
         puzzleId: 'P-21',
@@ -385,7 +365,6 @@ const puzzles = [
             ],
         },
         answer: 'created_at',
-        penaltySecondsOnWrong: 300,
     },
 ];
 
@@ -408,7 +387,6 @@ async function main() {
                 prompt: { type: String, required: true },
                 uiConfig: { type: mongoose.Schema.Types.Mixed, default: {} },
                 answer: { type: mongoose.Schema.Types.Mixed, required: true },
-                penaltySecondsOnWrong: { type: Number, default: 300 },
             });
             const Puzzle = mongoose.models.Puzzle || mongoose.model('Puzzle', PuzzleSchema);
 

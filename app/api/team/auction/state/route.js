@@ -76,7 +76,6 @@ export async function GET(req) {
                  puzzleId: p.puzzleId,
                  title: p.title,
                  prompt: p.prompt,
-                 basePrice: p.basePrice,
                  points: p.points,
              }
            }

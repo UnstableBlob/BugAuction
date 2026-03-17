@@ -22,8 +22,6 @@ async function main() {
         uiConfig: { type: mongoose.Schema.Types.Mixed, default: {} },
         answer: { type: mongoose.Schema.Types.Mixed, required: true },
         points: { type: Number, default: 0 },
-        basePrice: { type: Number, default: 0 },
-        penaltySecondsOnWrong: { type: Number, default: 300 },
     });
     const Puzzle = mongoose.models.Puzzle || mongoose.model('Puzzle', PuzzleSchema);
 
@@ -39,8 +37,6 @@ async function main() {
         prompt: `Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: "${folder}".`,
         answer: folder,
         points: Math.floor(Math.random() * (500 - 100 + 1)) + 100, // Random points between 100 and 500
-        basePrice: Math.floor(Math.random() * (200 - 50 + 1)) + 50, // Random base price between 50 and 200
-        penaltySecondsOnWrong: 300,
         uiConfig: {
             downloadUrl: `/bugs/${folder}.zip` // We'll move them to public/bugs/
         }

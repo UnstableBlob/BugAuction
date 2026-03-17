@@ -164,7 +164,6 @@ export default function AdminLeaderboardPage() {
                                     <th className="text-left px-3 py-3 font-normal">Team</th>
                                     <th className="text-left px-3 py-3 font-normal">Status</th>
                                     <th className="text-left px-3 py-3 font-normal">Solved</th>
-                                    <th className="text-left px-3 py-3 font-normal">Penalty</th>
                                     <th className="text-left px-3 py-3 font-normal">Time</th>
                                 </tr>
                             </thead>
@@ -214,16 +213,7 @@ export default function AdminLeaderboardPage() {
                                             <span className="text-terminal-muted"> / {t.totalPuzzles}</span>
                                         </td>
 
-                                        {/* Penalty */}
-                                        <td className="px-3 py-3">
-                                            {t.penaltySeconds ? (
-                                                <span className="text-terminal-red">
-                                                    -{Math.round(t.penaltySeconds / 60)}m
-                                                </span>
-                                            ) : (
-                                                <span className="text-terminal-muted">—</span>
-                                            )}
-                                        </td>
+
 
                                         {/* Time */}
                                         <td

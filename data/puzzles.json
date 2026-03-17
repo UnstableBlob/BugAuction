@@ -6,8 +6,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"empty_input\".",
     "answer": "empty_input",
     "points": 474,
-    "basePrice": 101,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/empty_input.zip"
     }
@@ -19,8 +17,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"global_instead_of_local\".",
     "answer": "global_instead_of_local",
     "points": 448,
-    "basePrice": 123,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/global_instead_of_local.zip"
     }
@@ -32,8 +28,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"incorrect_arguments\".",
     "answer": "incorrect_arguments",
     "points": 281,
-    "basePrice": 100,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/incorrect_arguments.zip"
     }
@@ -45,8 +39,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"incorrect_default_value\".",
     "answer": "incorrect_default_value",
     "points": 340,
-    "basePrice": 56,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/incorrect_default_value.zip"
     }
@@ -58,8 +50,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"incorrect_recursion_termination\".",
     "answer": "incorrect_recursion_termination",
     "points": 115,
-    "basePrice": 120,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/incorrect_recursion_termination.zip"
     }
@@ -71,8 +61,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"incorrect_scope\".",
     "answer": "incorrect_scope",
     "points": 320,
-    "basePrice": 169,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/incorrect_scope.zip"
     }
@@ -84,8 +72,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"incorrect_serialization\".",
     "answer": "incorrect_serialization",
     "points": 205,
-    "basePrice": 90,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/incorrect_serialization.zip"
     }
@@ -97,8 +83,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"malformed_data\".",
     "answer": "malformed_data",
     "points": 255,
-    "basePrice": 58,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/malformed_data.zip"
     }
@@ -110,8 +94,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"missing_break_condition\".",
     "answer": "missing_break_condition",
     "points": 380,
-    "basePrice": 195,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/missing_break_condition.zip"
     }
@@ -123,8 +105,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"modifying_immutable\".",
     "answer": "modifying_immutable",
     "points": 243,
-    "basePrice": 106,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/modifying_immutable.zip"
     }
@@ -136,8 +116,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"no_base_case\".",
     "answer": "no_base_case",
     "points": 472,
-    "basePrice": 128,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/no_base_case.zip"
     }
@@ -149,8 +127,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"null_undefined_value\".",
     "answer": "null_undefined_value",
     "points": 148,
-    "basePrice": 91,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/null_undefined_value.zip"
     }
@@ -162,8 +138,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"overwrite_accidentally\".",
     "answer": "overwrite_accidentally",
     "points": 368,
-    "basePrice": 113,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/overwrite_accidentally.zip"
     }
@@ -175,8 +149,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"premature_loop_exit\".",
     "answer": "premature_loop_exit",
     "points": 400,
-    "basePrice": 182,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/premature_loop_exit.zip"
     }
@@ -188,8 +160,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"read_before_assignment\".",
     "answer": "read_before_assignment",
     "points": 414,
-    "basePrice": 189,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/read_before_assignment.zip"
     }
@@ -201,8 +171,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"reusing_loop_variable\".",
     "answer": "reusing_loop_variable",
     "points": 486,
-    "basePrice": 103,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/reusing_loop_variable.zip"
     }
@@ -214,8 +182,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"stale_cached_value\".",
     "answer": "stale_cached_value",
     "points": 424,
-    "basePrice": 132,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/stale_cached_value.zip"
     }
@@ -227,8 +193,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"type_mismatch\".",
     "answer": "type_mismatch",
     "points": 225,
-    "basePrice": 91,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/type_mismatch.zip"
     }
@@ -240,8 +204,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"uninitialized_error\".",
     "answer": "uninitialized_error",
     "points": 281,
-    "basePrice": 55,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/uninitialized_error.zip"
     }
@@ -253,8 +215,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"uninitialized_variable\".",
     "answer": "uninitialized_variable",
     "points": 170,
-    "basePrice": 138,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/uninitialized_variable.zip"
     }
@@ -266,8 +226,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"variable_shadowing\".",
     "answer": "variable_shadowing",
     "points": 268,
-    "basePrice": 138,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/variable_shadowing.zip"
     }
@@ -279,8 +237,6 @@
     "prompt": "Fix the bug in the provided zip file. The answer to this puzzle is the folder name itself: \"yaml_issue\".",
     "answer": "yaml_issue",
     "points": 335,
-    "basePrice": 157,
-    "penaltySecondsOnWrong": 300,
     "uiConfig": {
       "downloadUrl": "/bugs/yaml_issue.zip"
     }

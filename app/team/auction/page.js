@@ -129,9 +129,6 @@ export default function AuctionPage() {
                   <div className="text-terminal-green text-sm uppercase tracking-wider mb-2 font-bold">Priority Target</div>
                   <div className="text-xl font-bold mb-2 text-white">{auctionState.puzzle.title}</div>
                   <div className="flex gap-4 mb-2">
-                     <div className="text-[10px] font-bold px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded uppercase tracking-tighter">
-                        Base: {auctionState.puzzle.basePrice}
-                     </div>
                      <div className="text-[10px] font-bold px-2 py-0.5 bg-green-500/10 text-green-500 border border-green-500/20 rounded uppercase tracking-tighter">
                         Reward: {auctionState.puzzle.points} PTS
                      </div>

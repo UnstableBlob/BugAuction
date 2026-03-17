@@ -37,7 +37,6 @@ export async function POST(req) {
     // Calculate stats
     const solvedCount = (team.solvedPuzzleIds || []).length;
     const totalPuzzles = (team.assignedPuzzleIds || []).length;
-    const penaltySeconds = team.penaltySeconds || 0;
 
     // Accuracy: solved / total puzzles (0 if none)
     const accuracyPct = totalPuzzles > 0 ? Math.round((solvedCount / totalPuzzles) * 100) : 0;
@@ -49,7 +48,6 @@ export async function POST(req) {
       status: finalStatus === "caught" ? "caught" : "success",
       finishTime: team.finishTime || now,
       finalScore,
-      finalPenalty: penaltySeconds,
       finalStatus,
     });
 
@@ -59,7 +57,6 @@ export async function POST(req) {
       timeTaken: timeTakenSeconds,
       finalStatus,
       finalScore,
-      finalPenalty: penaltySeconds,
       accuracy: accuracyPct,
     });
   } catch (err) {
