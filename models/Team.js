@@ -8,7 +8,7 @@ const TeamSchema = new mongoose.Schema(
     tid: { type: Number, unique: true, sparse: true },
     status: {
       type: String,
-      enum: ["inactive", "waiting", "auctioning", "playing", "success", "caught"],
+      enum: ["inactive", "auctioning", "playing", "success", "caught"],
       default: "inactive",
     },
     currency: { type: Number, default: 1000 },
@@ -23,19 +23,22 @@ const TeamSchema = new mongoose.Schema(
       ref: "Session",
       default: null,
     },
-    // timestamps for login/waiting/start — used by admin terminal
+    // timestamps for login/start — used by admin terminal
     loginTime: { type: Date, default: null },
-    waitingRoomEnteredAt: { type: Date, default: null },
     assignedPuzzleIds: [{ type: String }],
     currentIndex: { type: Number, default: 0 },
     solvedPuzzleIds: [{ type: String }],
-    penaltySeconds: { type: Number, default: 0 },
+    submissionHistory: [{
+      puzzleId: String,
+      timestamp: { type: Date, default: Date.now },
+      isCorrect: Boolean,
+      answer: String,
+    }],
     lastLoginAt: { type: Date, default: null },
     finishTime: { type: Date, default: null },
     gameStartTime: { type: Date, default: null },
     // final results (populated when session is stopped)
     finalScore: { type: Number, default: null },
-    finalPenalty: { type: Number, default: null },
     finalStatus: {
       type: String,
       enum: ["success", "caught", null],

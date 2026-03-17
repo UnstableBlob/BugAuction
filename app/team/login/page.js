@@ -35,7 +35,7 @@ export default function TeamLoginPage() {
       if (data.status === "playing") {
         router.push("/team/game");
       } else {
-        router.push("/team/waiting");
+        router.push("/team/auction");
       }
     } catch {
       setError("Network error. Try again.");

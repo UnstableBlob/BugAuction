@@ -1,4 +1,11 @@
 import './globals.css';
+import { Share_Tech_Mono } from 'next/font/google';
+
+const techMono = Share_Tech_Mono({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export const metadata = {
   title: 'Paraallax — CSI Event',
@@ -7,11 +14,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={techMono.className}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
       </head>
       <body className="bg-terminal-bg text-terminal-text font-mono min-h-screen antialiased">
         {children}

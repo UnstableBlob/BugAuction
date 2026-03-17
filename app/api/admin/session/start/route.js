@@ -24,27 +24,11 @@ export async function POST(req) {
     const admin = await getAdminFromRequest(req);
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { durationMinutes, puzzlesPerTeam, penaltyMinutes } = await req.json();
-    if (!durationMinutes || durationMinutes < 1) {
-      return NextResponse.json({ error: "durationMinutes must be >= 1" }, { status: 400 });
-    }
-
     await connectDB();
 
-    // Fetch waiting teams (teams that have logged in and are waiting)
-    const waitingTeams = await Team.find({ status: "waiting" }).lean();
-    const teamNames = waitingTeams.map((t) => t.teamName);
-
-    // Fetch all puzzles from the flat pool
-    const allPuzzles = await Puzzle.find({}, "puzzleId").lean();
-    const allPuzzleIds = allPuzzles.map((p) => p.puzzleId);
-
-    if (allPuzzleIds.length < (puzzlesPerTeam || 1)) {
-      return NextResponse.json(
-        { error: `Not enough puzzles in DB. Need ${puzzlesPerTeam}, have ${allPuzzleIds.length}` },
-        { status: 400 },
-      );
-    }
+    // Fetch auctioning teams
+    const auctioningTeams = await Team.find({ status: "auctioning" }).lean();
+    const teamNames = auctioningTeams.map((t) => t.teamName);
 
     // Create session document
     const startTime = new Date();
@@ -52,15 +36,12 @@ export async function POST(req) {
     const sessionDoc = new Session({
       status: "started",
       startedAt: startTime,
-      durationMinutes: Number(durationMinutes),
-      puzzlesPerTeam: Number(puzzlesPerTeam || 5),
-      penaltyMinutes: Number(penaltyMinutes ?? 5),
       teamNames,
     });
 
     // Collect existing assignments to store in session for historical context
     for (const tn of teamNames) {
-      const t = waitingTeams.find((wt) => wt.teamName === tn);
+      const t = auctioningTeams.find((wt) => wt.teamName === tn);
       if (t && t.assignedPuzzleIds) {
         sessionDoc.assignments.set(tn, t.assignedPuzzleIds);
       } else {
@@ -77,22 +58,15 @@ export async function POST(req) {
 
       await sessionDoc.save({ session: mongoSession });
 
-      // Update all waiting teams atomically
+      // Update all auctioning teams atomically
       const updates = [];
-      for (const t of waitingTeams) {
+      for (const t of auctioningTeams) {
         updates.push(
           Team.updateOne(
-            { _id: t._id, status: "waiting" },
+            { _id: t._id, status: "auctioning" },
             {
               $set: {
-                status: "auctioning",
-                // Notice we do NOT overwrite their assignedPuzzleIds!
-                // they keep what the admin explicitly allotted them.
-                currentIndex: 0,
-                solvedPuzzleIds: [],
-                penaltySeconds: 0,
                 activeSessionId: sessionDoc._id,
-                gameStartTime: startTime,
               },
             },
             { session: mongoSession },
@@ -117,16 +91,11 @@ export async function POST(req) {
     // Fallback (no transaction): save session then update teams sequentially
     await sessionDoc.save();
     const failed = [];
-    for (const t of waitingTeams) {
+    for (const t of auctioningTeams) {
       const res = await Team.findOneAndUpdate(
-        { _id: t._id, status: "waiting" },
+        { _id: t._id, status: "auctioning" },
         {
-          status: "auctioning",
-          currentIndex: 0,
-          solvedPuzzleIds: [],
-          penaltySeconds: 0,
           activeSessionId: sessionDoc._id,
-          gameStartTime: startTime,
         },
       );
       if (!res) failed.push(t.teamName);

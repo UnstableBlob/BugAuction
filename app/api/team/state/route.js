@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/db';
 import Session from '@/models/Session';
 import Puzzle from '@/models/Puzzle';
 import Team from '@/models/Team';
+import { getCache, setCache } from '@/lib/cache';
 
 
 
@@ -14,11 +15,9 @@ export async function GET(req) {
 
         await connectDB();
 
-        // ── Waiting state ─────────────────────────────────────────────────────────
-        // Always return 'waiting' — admin must explicitly approve the team.
-        // The approve-teams endpoint handles puzzle assignment and promotion.
-        if (team.status === 'waiting') {
-            return NextResponse.json({ status: 'waiting' });
+        // Always return 'auctioning' if they are in the auctioning state.
+        if (team.status === 'auctioning') {
+            return NextResponse.json({ status: 'auctioning' });
         }
 
         // ── Terminal states ──────────────────────────────────────────────────────
@@ -36,8 +35,21 @@ export async function GET(req) {
 
         // Resolve session for time calculations
         let session = null;
-        if (freshTeam.activeSessionId) session = await Session.findById(freshTeam.activeSessionId);
-        if (!session) session = await Session.findOne({ status: 'started' }).sort({ startedAt: -1 });
+        if (freshTeam.activeSessionId) {
+            const cacheKey = `session_${freshTeam.activeSessionId}`;
+            session = getCache(cacheKey);
+            if (!session) {
+                session = await Session.findById(freshTeam.activeSessionId).lean();
+                if (session) setCache(cacheKey, session, 2);
+            }
+        }
+        if (!session) {
+            session = getCache('activeSession');
+            if (!session) {
+                session = await Session.findOne({ status: 'started' }).sort({ startedAt: -1 }).lean();
+                if (session) setCache('activeSession', session, 2);
+            }
+        }
         if (!session) return NextResponse.json({ error: 'Session not found' }, { status: 404 });
 
         // If session has ended, redirect to results
@@ -45,16 +57,9 @@ export async function GET(req) {
             return NextResponse.json({ status: 'ended', shouldRedirect: '/team/results' });
         }
 
-        // Calculate timeLeft
+        // Calculate time since start
         const now = Date.now();
-        const endTime = new Date(session.startedAt).getTime() + session.durationMinutes * 60 * 1000;
-        const timeLeft = Math.floor((endTime - now) / 1000) - (freshTeam.penaltySeconds || 0);
-
-        // Auto-catch if time expired
-        if (timeLeft <= 0) {
-            await Team.findByIdAndUpdate(freshTeam._id, { status: 'caught' });
-            return NextResponse.json({ status: 'caught' });
-        }
+        const timeSinceStart = Math.floor((now - new Date(session.startedAt).getTime()) / 1000);
 
         // Guard against empty assignedPuzzleIds (race condition on first poll)
         if (!freshTeam.assignedPuzzleIds || freshTeam.assignedPuzzleIds.length === 0) {
@@ -62,7 +67,12 @@ export async function GET(req) {
         }
 
         const puzzleId = freshTeam.assignedPuzzleIds[freshTeam.currentIndex];
-        const puzzle = await Puzzle.findOne({ puzzleId });
+        let puzzle = getCache(`puzzle_${puzzleId}`);
+        if (!puzzle) {
+            puzzle = await Puzzle.findOne({ puzzleId }).lean();
+            if (puzzle) setCache(`puzzle_${puzzleId}`, puzzle, 3600); // Puzzles don't change, cache for 1 hour
+        }
+        
         if (!puzzle) {
             return NextResponse.json({ status: 'loading' });
         }
@@ -71,8 +81,7 @@ export async function GET(req) {
 
         return NextResponse.json({
             status: 'playing',
-            timeLeft,
-            penaltySeconds: freshTeam.penaltySeconds,
+            timeSinceStart,
             currentIndex: freshTeam.currentIndex,
             totalPuzzles: freshTeam.assignedPuzzleIds.length,
             solvedCount: (freshTeam.solvedPuzzleIds || []).length,

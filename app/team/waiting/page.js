@@ -2,11 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
+
+const fetcher = (url) => fetch(url).then((res) => {
+  if (res.status === 401) throw new Error("Unauthorized");
+  return res.json();
+});
 
 export default function WaitingPage() {
   const router = useRouter();
   const [dots, setDots] = useState("");
   const [teamName, setTeamName] = useState("");
+
+  const { data, error } = useSWR("/api/team/state", fetcher, { refreshInterval: 5000 });
 
   useEffect(() => {
     // Animate dots
@@ -22,37 +30,27 @@ export default function WaitingPage() {
       })
       .catch(() => {});
 
-    // Poll every 10 seconds
-    const poll = async () => {
-      try {
-        const res = await fetch("/api/team/state");
-        if (res.status === 401) {
-          router.push("/team/login");
-          return;
-        }
-        const data = await res.json();
-        if (data.status === "playing" || data.shouldRedirect === "/team/game") {
-          router.push("/team/game");
-        } else if (data.status === "auctioning") {
-          router.push("/team/auction");
-        } else if (data.status === "success") {
-          router.push("/team/success");
-        } else if (data.status === "caught") {
-          router.push("/team/caught");
-        }
-      } catch {
-        /* network hiccup, retry next poll */
+    return () => clearInterval(dotInterval);
+  }, []);
+
+  useEffect(() => {
+    if (error && error.message === "Unauthorized") {
+      router.push("/team/login");
+      return;
+    }
+    
+    if (data) {
+      if (data.status === "playing" || data.shouldRedirect === "/team/game") {
+        router.push("/team/game");
+      } else if (data.status === "auctioning") {
+        router.push("/team/auction");
+      } else if (data.status === "success") {
+        router.push("/team/success");
+      } else if (data.status === "caught") {
+        router.push("/team/caught");
       }
-    };
-
-    poll(); // immediate first check
-    const pollInterval = setInterval(poll, 10000);
-
-    return () => {
-      clearInterval(dotInterval);
-      clearInterval(pollInterval);
-    };
-  }, [router]);
+    }
+  }, [data, error, router]);
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4">

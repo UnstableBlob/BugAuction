@@ -1,0 +1,150 @@
+
+> paraallax@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.5
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+./components/puzzles/Game5Decryption.js
+51:11  Warning: The 'handleBackspace' function makes the dependencies of useEffect Hook (at line 101) change on every render. To fix this, wrap the definition of 'handleBackspace' in its own useCallback() Hook.  react-hooks/exhaustive-deps
+56:11  Warning: The 'handleSubmit' function makes the dependencies of useEffect Hook (at line 101) change on every render. To fix this, wrap the definition of 'handleSubmit' in its own useCallback() Hook.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/44) ...
+Admin teams error: q [Error]: Dynamic server usage: Route /api/admin/teams couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at W (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:21106)
+    at Object.get (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:28459)
+    at f (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\puzzles\route.js:1:3403)
+    at s (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\puzzles\route.js:1:1975)
+    at c (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\teams\route.js:1:763)
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:36264
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093) {
+  description: "Route /api/admin/teams couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auction state error: q [Error]: Dynamic server usage: Route /api/team/auction/state couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at W (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:21106)
+    at Object.get (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:28459)
+    at c (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\room\create\route.js:1:3380)
+    at o (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\room\create\route.js:1:2065)
+    at y (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\team\auction\state\route.js:1:785)
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:36264
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093) {
+  description: "Route /api/team/auction/state couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (11/44) 
+Results error: q [Error]: Dynamic server usage: Route /api/team/results couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at W (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:21106)
+    at Object.get (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:28459)
+    at c (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\puzzles\route.js:1:3329)
+    at l (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\puzzles\route.js:1:1805)
+    at c (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\team\results\route.js:1:765)
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:36264
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093) {
+  description: "Route /api/team/results couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Team state error: q [Error]: Dynamic server usage: Route /api/team/state couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at W (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:21106)
+    at Object.get (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:28459)
+    at c (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\room\start\route.js:1:4214)
+    at o (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\room\start\route.js:1:2899)
+    at f (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\team\state\route.js:1:775)
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:36264
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093) {
+  description: "Route /api/team/state couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Event log error: q [Error]: Dynamic server usage: Route /api/admin/session/event-log couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at W (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:21106)
+    at Object.get (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:28459)
+    at f (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\session\start-game\route.js:1:3675)
+    at o (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\session\start-game\route.js:1:2456)
+    at p (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\session\event-log\route.js:1:753)
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:36264
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093) {
+  description: "Route /api/admin/session/event-log couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (22/44) 
+Admin puzzles list error: q [Error]: Dynamic server usage: Route /api/admin/puzzles couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at W (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:21106)
+    at Object.get (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:28459)
+    at y (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\approve-teams\route.js:1:3992)
+    at l (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\approve-teams\route.js:1:2773)
+    at m (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\puzzles\route.js:1:753)
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:36264
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093) {
+  description: "Route /api/admin/puzzles couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+ReferenceError: useSWR is not defined
+    at o (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\admin\leaderboard\page.js:1:3313)
+    at nj (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:46251)
+    at nM (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:47571)
+    at nN (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:64546)
+    at nI (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:47010)
+    at nM (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:47717)
+    at nM (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:61546)
+    at nN (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:64546)
+    at nB (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:67538)
+    at nD (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:66680) {
+  digest: '3182728411'
+}
+
+Error occurred prerendering page "/admin/leaderboard". Read more: https://nextjs.org/docs/messages/prerender-error
+
+ReferenceError: useSWR is not defined
+    at o (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\admin\leaderboard\page.js:1:3313)
+    at nj (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:46251)
+    at nM (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:47571)
+    at nN (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:64546)
+    at nI (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:47010)
+    at nM (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:47717)
+    at nM (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:61546)
+    at nN (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:64546)
+    at nB (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:67538)
+    at nD (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:66680)
+   Generating static pages (33/44) 
+Leaderboard error: q [Error]: Dynamic server usage: Route /api/admin/leaderboard couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at W (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:21106)
+    at Object.get (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:28459)
+    at f (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\room\create\route.js:1:3454)
+    at s (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\room\create\route.js:1:2235)
+    at c (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\.next\server\app\api\admin\leaderboard\route.js:1:762)
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:36264
+    at C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\athar\OneDrive\Desktop\coding\javascript\BugAuction\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093) {
+  description: "Route /api/admin/leaderboard couldn't be rendered statically because it used `request.headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+ ✓ Generating static pages (44/44)
+
+> Export encountered errors on following paths:
+	/admin/leaderboard/page: /admin/leaderboard

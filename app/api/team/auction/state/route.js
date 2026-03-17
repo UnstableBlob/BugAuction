@@ -5,6 +5,7 @@ import Auction from "@/models/Auction";
 import Session from "@/models/Session";
 import Puzzle from "@/models/Puzzle";
 import Team from "@/models/Team";
+import { getCache, setCache } from "@/lib/cache";
 
 export async function GET(req) {
   try {
@@ -15,14 +16,26 @@ export async function GET(req) {
 
     await connectDB();
 
-    const team = await Team.findById(teamCookie._id);
+    const team = await Team.findById(teamCookie._id).lean();
     if (!team) {
       return NextResponse.json({ error: "Team not found" }, { status: 404 });
     }
 
-    const activeSession = await Session.findOne({ status: "started" }).sort({
-      startedAt: -1,
-    });
+    // Direct redirect if already playing
+    if (team.status === "playing") {
+      return NextResponse.json({ status: "playing" });
+    }
+    if (team.status === "success" || team.status === "caught") {
+      return NextResponse.json({ status: team.status });
+    }
+
+    let activeSession = getCache('activeSession');
+    if (!activeSession) {
+      activeSession = await Session.findOne({ status: "started" }).sort({
+        startedAt: -1,
+      }).lean();
+      if (activeSession) setCache('activeSession', activeSession, 2);
+    }
 
     if (!activeSession) {
        return NextResponse.json(
@@ -37,13 +50,15 @@ export async function GET(req) {
       status: "open",
     })
       .populate("winnerTeamId", "teamName")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     // If no open auction, get the most recently closed one to show the result
     if (!currentAuction) {
       currentAuction = await Auction.findOne({ sessionId: activeSession._id })
         .populate("winnerTeamId", "teamName")
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
     }
 
     let auctionInfo = null;
@@ -51,7 +66,11 @@ export async function GET(req) {
     if (currentAuction) {
         let puzzleDetails = null;
         if(currentAuction.status === "open") {
-           const p = await Puzzle.findOne({ puzzleId: currentAuction.puzzleId});
+           let p = getCache(`puzzle_${currentAuction.puzzleId}`);
+           if (!p) {
+               p = await Puzzle.findOne({ puzzleId: currentAuction.puzzleId}).lean();
+               if(p) setCache(`puzzle_${currentAuction.puzzleId}`, p, 3600);
+           }
            if(p) {
              puzzleDetails = {
                  puzzleId: p.puzzleId,
@@ -78,7 +97,7 @@ export async function GET(req) {
     }
 
     return NextResponse.json({
-      status: "auctioning",
+      status: team.status,
       currency: team.currency,
       auction: auctionInfo,
     });

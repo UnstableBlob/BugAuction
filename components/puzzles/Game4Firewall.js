@@ -132,7 +132,7 @@ export default function Game4Firewall({ onComplete }) {
                 <div className={styles.hudWrapper}>
                     <h2 className={styles.title}>THE FIREWALL</h2>
                     <p className={styles.brief}>
-                        Navigate the grid blind. Avoid nodes flagged as 'W'.<br />
+                        Navigate the grid blind. Avoid nodes flagged as &apos;W&apos;.<br />
                         Your proximity sensors will warn you of adjacent barriers.<br />
                         Grid dimensions: 5x5. Target: (4,4). Time Limit: 2:00.
                     </p>

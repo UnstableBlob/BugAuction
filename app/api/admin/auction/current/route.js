@@ -2,14 +2,25 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Auction from "@/models/Auction";
 import Session from "@/models/Session";
+import { getCache, setCache } from "@/lib/cache";
 
 export async function GET(req) {
   try {
+    // If we have cached the current auction response, return it directly to reduce DB load
+    const cachedAuction = getCache("admin_current_auction");
+    if (cachedAuction !== null) {
+      return NextResponse.json({ auction: cachedAuction }, { status: 200 });
+    }
+
     await connectDB();
 
-    const activeSession = await Session.findOne({ status: "started" }).sort({
-      startedAt: -1,
-    });
+    let activeSession = getCache('activeSession');
+    if (!activeSession) {
+      activeSession = await Session.findOne({ status: "started" }).sort({
+        startedAt: -1,
+      }).lean();
+      if (activeSession) setCache('activeSession', activeSession, 2);
+    }
 
     if (!activeSession) {
       return NextResponse.json({ auction: null }, { status: 200 });
@@ -18,7 +29,7 @@ export async function GET(req) {
     const currentAuction = await Auction.findOne({
       sessionId: activeSession._id,
       status: "open",
-    }).populate("bids.teamId");
+    }).populate("bids.teamId").lean();
 
     let cleanAuction = null;
     if (currentAuction) {
@@ -36,6 +47,8 @@ export async function GET(req) {
         bids: safeBids,
       };
     }
+
+    setCache("admin_current_auction", cleanAuction, 2);
 
     return NextResponse.json({ auction: cleanAuction }, { status: 200 });
   } catch (err) {

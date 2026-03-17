@@ -3,6 +3,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import PuzzleRenderer from "@/components/PuzzleRenderer";
+import useSWR from "swr";
+
+const fetcher = (url) => fetch(url).then((res) => {
+  if (res.status === 401) throw new Error("Unauthorized");
+  return res.json();
+});
 
 function formatTime(seconds) {
   if (seconds <= 0) return "00:00:00";
@@ -20,14 +26,14 @@ export default function GamePage() {
   const [navigating, setNavigating] = useState(false);
   const timerRef = useRef(null);
 
-  const fetchState = async () => {
-    try {
-      const res = await fetch("/api/team/state");
-      if (res.status === 401) {
-        router.push("/team/login");
-        return;
-      }
-      const data = await res.json();
+  const { data, error, mutate } = useSWR("/api/team/state", fetcher, { refreshInterval: 3000 });
+
+  useEffect(() => {
+    if (error && error.message === "Unauthorized") {
+      router.push("/team/login");
+      return;
+    }
+    if (data) {
       if (data.status === "success") {
         router.push("/team/success");
         return;
@@ -52,25 +58,12 @@ export default function GamePage() {
       if (data.status === "loading") {
         return;
       }
-      // Only set state when we have full game data — guard against bare
-      // {status:'playing', shouldRedirect} that comes from the waiting-path
+      // Only set state when we have full game data
       if (data.status === "playing" && data.puzzle && typeof data.timeLeft === "number") {
         setState(data);
-      } else if (data.status === "playing") {
-        // Full data not ready yet — stay on loading screen, retry next poll
       }
-    } catch {
-      /* retry on next poll */
     }
-  };
-
-  useEffect(() => {
-    fetchState();
-    // Poll every 3s so late-joiners get their puzzle data quickly.
-    // (Previously 10s caused a long stuck "LOADING MISSION DATA..." screen.)
-    const interval = setInterval(fetchState, 3000);
-    return () => clearInterval(interval);
-  }, [router]);
+  }, [data, error, router]);
 
   // Auto-redirect when session ends or puzzle is missing
   useEffect(() => {
@@ -80,22 +73,20 @@ export default function GamePage() {
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [state?.puzzle, router]);
+  }, [state, router]);
 
-  // Client-side countdown between polls
+  // Client-side count up between polls
   useEffect(() => {
     if (!state) return;
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setState((prev) => {
         if (!prev) return prev;
-        const newTime = (prev.timeLeft || 0) - 1;
-        if (newTime <= 0) router.push("/team/caught");
-        return { ...prev, timeLeft: newTime };
+        return { ...prev, timeSinceStart: (prev.timeSinceStart || 0) + 1 };
       });
     }, 1000);
     return () => clearInterval(timerRef.current);
-  }, [state?.timeLeft, router]);
+  }, [state, router]);
 
   async function handleSubmit(answer) {
     if (!state || submitting) return;
@@ -107,13 +98,14 @@ export default function GamePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ puzzleId: state.puzzle.puzzleId, answer }),
       });
-      const data = await res.json();
-      setMessage(data.message || "");
-      if (data.allSolved) {
+      const resData = await res.json();
+      setMessage(resData.message || "");
+      if (resData.allSolved) {
         router.push("/team/success");
         return;
       }
-      await fetchState(); // refresh state after submit
+      mutate(); // refresh state after submit
+
     } catch {
       setMessage("Network error. Try again.");
     } finally {
@@ -131,7 +123,7 @@ export default function GamePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ direction }),
       });
-      await fetchState();
+      mutate();
     } catch {
       /* ignore */
     } finally {
@@ -153,7 +145,7 @@ export default function GamePage() {
         return;
       }
       setMessage(data.message || "");
-      await fetchState();
+      mutate();
     } catch {
       setMessage("Debug solve failed.");
     } finally {
@@ -161,23 +153,7 @@ export default function GamePage() {
     }
   }
 
-  // ⚠️  DEBUG ONLY — remove before going live
-  const [applyingPenalty, setApplyingPenalty] = useState(false);
-  async function handleAddPenalty() {
-    if (applyingPenalty) return;
-    setApplyingPenalty(true);
-    setMessage("");
-    try {
-      const res = await fetch("/api/team/penalty", { method: "POST" });
-      const data = await res.json();
-      setMessage(data.message || "Penalty applied.");
-      await fetchState(); // refresh HUD so penaltySeconds updates immediately
-    } catch {
-      setMessage("Failed to apply penalty.");
-    } finally {
-      setApplyingPenalty(false);
-    }
-  }
+
 
 
   if (!state) {
@@ -190,25 +166,18 @@ export default function GamePage() {
     );
   }
 
-  const timeColor =
-    state.timeLeft > 300
-      ? "text-terminal-green"
-      : state.timeLeft > 60
-        ? "text-terminal-amber"
-        : "text-terminal-red";
-
   return (
     <main className="min-h-screen p-4 max-w-4xl mx-auto">
       {/* Top HUD */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="terminal-card text-center">
           <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">
-            Time Left
+            Time Elapsed
           </div>
           <div
-            className={`text-2xl font-bold ${timeColor} ${state.timeLeft <= 60 ? "animate-pulse" : ""}`}
+            className={`text-2xl font-bold text-terminal-green`}
           >
-            {formatTime(state.timeLeft)}
+            {formatTime(state.timeSinceStart)}
           </div>
         </div>
         <div className="terminal-card text-center">
@@ -228,14 +197,6 @@ export default function GamePage() {
           </div>
         </div>
       </div>
-
-      {/* Penalty display */}
-      {state.penaltySeconds > 0 && (
-        <div className="mb-4 border border-terminal-red/50 bg-red-950/20 rounded px-4 py-2 text-terminal-red text-xs">
-          ⚠ Total penalty: -{Math.round(state.penaltySeconds / 60)} min(
-          {state.penaltySeconds}s)
-        </div>
-      )}
 
       {/* Puzzle Card */}
       <div className="terminal-card mb-4">
@@ -303,13 +264,6 @@ export default function GamePage() {
             className="px-4 py-2 text-xs font-bold tracking-widest rounded border border-yellow-500 text-yellow-300 bg-yellow-900/30 hover:bg-yellow-800/40 transition-colors disabled:opacity-40"
           >
             {debugSolving ? "⏳ SOLVING..." : "⚡ NEXT + SOLVE"}
-          </button>
-          <button
-            onClick={handleAddPenalty}
-            disabled={applyingPenalty}
-            className="px-4 py-2 text-xs font-bold tracking-widest rounded border border-red-500 text-red-300 bg-red-900/30 hover:bg-red-800/40 transition-colors disabled:opacity-40"
-          >
-            {applyingPenalty ? "⏳ APPLYING..." : "⚠ ADD PENALTY"}
           </button>
         </div>
       </div>

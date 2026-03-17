@@ -44,8 +44,8 @@ export default function CaughtPage() {
                         ✗ TIME EXPIRED — CAUGHT
                     </div>
                     <div className="text-terminal-text text-sm leading-relaxed">
-                        Your time ran out before all puzzles were solved.<br />
-                        The system has flagged your team. Await further instructions.
+                        The session has been concluded by the administrator.<br />
+                        Your final score has been locked. Await further instructions.
                     </div>
                 </div>
 

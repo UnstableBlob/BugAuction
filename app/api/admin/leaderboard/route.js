@@ -3,6 +3,7 @@ import { getAdminFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Session from "@/models/Session";
 import Team from "@/models/Team";
+import { getCache, setCache } from "@/lib/cache";
 
 export async function GET(req) {
   try {
@@ -10,29 +11,27 @@ export async function GET(req) {
     if (!admin)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const cachedResponse = getCache('admin_leaderboard');
+    if (cachedResponse) {
+      return NextResponse.json(cachedResponse);
+    }
+
     await connectDB();
 
     // Find the most recent session (started or ended)
-    const session = await Session.findOne()
-      .sort({ startedAt: -1 })
-      .lean();
+    let session = getCache('activeSession');
+    if (!session) {
+      session = await Session.findOne().sort({ startedAt: -1 }).lean();
+      if (session && session.status === 'started') {
+        setCache('activeSession', session, 2);
+      }
+    }
 
     if (!session) {
       return NextResponse.json({ leaderboard: [], session: null });
     }
 
-    // Proactively catch any teams whose timer has expired - same logic as /api/admin/teams
-    if (session.status === "started" && session.startedAt) {
-      const endTime =
-        new Date(session.startedAt).getTime() +
-        Number(session.durationMinutes) * 60 * 1000;
-      if (Date.now() > endTime) {
-        await Team.updateMany(
-          { activeSessionId: session._id, status: "playing" },
-          { $set: { status: "caught" } },
-        );
-      }
-    }
+
 
     // Get all teams that participated in this session
     const teamNames = session.teamNames || [];
@@ -48,24 +47,14 @@ export async function GET(req) {
 
     const now = Date.now();
     const leaderboard = teams.map((team) => {
-      let timeLeft = null;
       let timeTaken = null;
 
-      if (session.startedAt && session.status === "started") {
-        const endTime =
-          new Date(session.startedAt).getTime() +
-          Number(session.durationMinutes) * 60 * 1000;
-        timeLeft =
-          Math.floor((endTime - now) / 1000) - (team.penaltySeconds || 0);
-        if (timeLeft < 0) timeLeft = 0;
-      }
-
-      if (team.status === "success" && team.finishTime && team.gameStartTime) {
-        timeTaken = Math.floor(
-          (new Date(team.finishTime).getTime() -
-            new Date(team.gameStartTime).getTime()) /
-          1000
-        );
+      if (team.gameStartTime) {
+        if (team.status === "success" && team.finishTime) {
+          timeTaken = Math.floor((new Date(team.finishTime).getTime() - new Date(team.gameStartTime).getTime()) / 1000);
+        } else {
+          timeTaken = Math.floor((now - new Date(team.gameStartTime).getTime()) / 1000);
+        }
       }
 
       return {
@@ -73,31 +62,29 @@ export async function GET(req) {
         status: team.status,
         solvedCount: (team.solvedPuzzleIds || []).length,
         totalPuzzles: (team.assignedPuzzleIds || []).length,
-        penaltySeconds: team.penaltySeconds || 0,
-        timeLeft,
         timeTaken,
       };
     });
 
     // Sort: 1st priority = score (solvedCount) descending
-    //       2nd priority = penalty (penaltySeconds) ascending (less penalty wins ties)
-    //       3rd priority = timeLeft descending (more time remaining = solved faster = wins ties)
+    //       2nd priority = timeTaken ascending (less time = wins ties)
     leaderboard.sort((a, b) => {
       if (b.solvedCount !== a.solvedCount) return b.solvedCount - a.solvedCount;
-      if ((a.penaltySeconds || 0) !== (b.penaltySeconds || 0))
-        return (a.penaltySeconds || 0) - (b.penaltySeconds || 0);
-      return (b.timeLeft || 0) - (a.timeLeft || 0);
+      return (a.timeTaken || 0) - (b.timeTaken || 0);
     });
 
-    return NextResponse.json({
+    const responseData = {
       leaderboard,
       session: {
         _id: session._id,
         status: session.status,
-        durationMinutes: session.durationMinutes,
         startedAt: session.startedAt,
       },
-    });
+    };
+
+    setCache('admin_leaderboard', responseData, 2);
+
+    return NextResponse.json(responseData);
   } catch (err) {
     console.error("Leaderboard error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
 
 function formatTime(s) {
     if (s === null || s === undefined) return "--:--:--";
@@ -27,33 +28,28 @@ export default function AdminLeaderboardPage() {
     const [leaderboard, setLeaderboard] = useState([]);
     const [session, setSession] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
-    const [loading, setLoading] = useState(true);
     const timerRef = useRef(null);
 
-    const fetchLeaderboard = async () => {
-        try {
-            const res = await fetch("/api/admin/leaderboard");
-            if (res.status === 401) {
-                router.push("/admin/login");
-                return;
-            }
-            if (!res.ok) return;
-            const data = await res.json();
-            setLeaderboard(data.leaderboard || []);
-            if (data.session) setSession(data.session);
-            setLastUpdated(new Date());
-        } catch {
-            /* retry on next poll */
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { data: lbData, error } = useSWR("/api/admin/leaderboard", async (url) => {
+        const res = await fetch(url);
+        if (res.status === 401) throw new Error("Unauthorized");
+        if (!res.ok) throw new Error("Failed to fetch");
+        return res.json();
+    }, { refreshInterval: 10000 });
 
     useEffect(() => {
-        fetchLeaderboard();
-        const interval = setInterval(fetchLeaderboard, 10000);
-        return () => clearInterval(interval);
-    }, []);
+        if (error && error.message === "Unauthorized") {
+            router.push("/admin/login");
+        }
+    }, [error, router]);
+
+    useEffect(() => {
+        if (lbData) {
+            setLeaderboard(lbData.leaderboard || []);
+            if (lbData.session) setSession(lbData.session);
+            setLastUpdated(new Date());
+        }
+    }, [lbData]);
 
     // Countdown timer — tick every second to decrement timeLeft
     useEffect(() => {
@@ -152,7 +148,7 @@ export default function AdminLeaderboardPage() {
                     )}
                 </div>
 
-                {loading ? (
+                {(!lbData && !error) ? (
                     <div className="text-terminal-muted text-center py-8 animate-pulse">
                         Loading leaderboard data...
                     </div>

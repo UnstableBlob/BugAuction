@@ -3,6 +3,7 @@ import { getAdminFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
 import Session from "@/models/Session";
+import { getCache, setCache } from "@/lib/cache";
 
 export async function GET(req) {
   try {
@@ -15,9 +16,14 @@ export async function GET(req) {
     // Proactively auto-catch teams whose session timer has expired.
     // This ensures the admin dashboard reflects correct statuses even if
     // a team's browser never polled /api/team/state after time ran out.
-    const activeSession = await Session.findOne({ status: "started" })
-      .sort({ startedAt: -1 })
-      .lean();
+    let activeSession = getCache('activeSession');
+    if (!activeSession) {
+      activeSession = await Session.findOne({ status: "started" })
+        .sort({ startedAt: -1 })
+        .lean();
+      if (activeSession) setCache('activeSession', activeSession, 2);
+    }
+    
     if (activeSession && activeSession.startedAt) {
       const endTime =
         new Date(activeSession.startedAt).getTime() +

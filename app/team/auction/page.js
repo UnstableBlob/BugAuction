@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
+
+const fetcher = (url) => fetch(url).then((res) => {
+  if (res.status === 401 || res.status === 403 || res.status === 404) throw new Error("Unauthorized");
+  return res.json();
+});
 
 export default function AuctionPage() {
   const router = useRouter();
@@ -13,6 +19,8 @@ export default function AuctionPage() {
   const [submitting, setSubmitting] = useState(false);
   const [teamName, setTeamName] = useState("");
 
+  const { data, error, mutate } = useSWR("/api/team/auction/state", fetcher, { refreshInterval: 3000 });
+
   useEffect(() => {
     fetch("/api/team/me")
       .then((r) => r.json())
@@ -20,46 +28,34 @@ export default function AuctionPage() {
         if (d.teamName) setTeamName(d.teamName);
       })
       .catch(() => {});
+  }, []);
 
-    const poll = async () => {
-      try {
-        const res = await fetch("/api/team/auction/state");
-        if (res.status === 401 || res.status === 403 || res.status === 404) {
-          router.push("/team/login");
-          return;
-        }
-        
-        const data = await res.json();
-        
-        // If the session hasn't started or is still waiting
-        if (data.status === "waiting") {
-           // We map go to waiting
-           router.push("/team/waiting");
-           return;
-        }
-        
-        // If the team has moved past auctioning phase
-        if (data.status === "playing") {
-          router.push("/team/game");
-          return;
-        }
+  useEffect(() => {
+    if (error && error.message === "Unauthorized") {
+      router.push("/team/login");
+      return;
+    }
+    if (data) {
+      if (data.status === "playing") {
+        router.push("/team/game");
+        return;
+      }
+      if (data.status === "success") {
+        router.push("/team/success");
+        return;
+      }
+      if (data.status === "caught") {
+        router.push("/team/caught");
+        return;
+      }
 
-        if (data.status === "auctioning") {
-          setCurrency(data.currency || 0);
-          setAuctionState(data.auction);
-        }
-      } catch {
-        /* network error */
-      } finally {
+      if (data.status === "auctioning" || data.status === "waiting") {
+        setCurrency(data.currency || 0);
+        setAuctionState(data.auction);
         setLoading(false);
       }
-    };
-
-    poll();
-    const pollInterval = setInterval(poll, 3000); // Poll frequently during auction
-
-    return () => clearInterval(pollInterval);
-  }, [router]);
+    }
+  }, [data, error, router]);
 
   async function submitBid(e) {
     e.preventDefault();
@@ -81,13 +77,7 @@ export default function AuctionPage() {
       } else {
         setMsg("✓ Bid placed successfully!");
         setBidAmount("");
-        // Force an immediate state update
-        fetch("/api/team/auction/state")
-          .then(r => r.json())
-          .then(d => {
-            if(d.auction) setAuctionState(d.auction);
-            if(d.currency) setCurrency(d.currency);
-          }).catch(()=>{});
+        mutate();
       }
     } catch {
       setMsg("Network error.");

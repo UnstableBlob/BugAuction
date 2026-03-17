@@ -42,10 +42,22 @@ export async function POST(req) {
         if (isCorrect) {
             const newSolved = [...team.solvedPuzzleIds, puzzleId];
             const allSolved = newSolved.length >= team.assignedPuzzleIds.length;
-            await Team.findByIdAndUpdate(team._id, {
+            let dbUpdate = {
                 solvedPuzzleIds: newSolved,
                 status: allSolved ? 'success' : 'playing',
-            });
+                $push: {
+                    submissionHistory: {
+                        puzzleId,
+                        timestamp: new Date(),
+                        isCorrect: true,
+                        answer: answer,
+                    }
+                }
+            };
+            if (allSolved) {
+                dbUpdate.finishTime = new Date();
+            }
+            await Team.findByIdAndUpdate(team._id, dbUpdate);
             return NextResponse.json({
                 correct: true,
                 message: allSolved ? 'All puzzles solved! Mission complete.' : 'Correct! Puzzle unlocked.',
@@ -54,12 +66,19 @@ export async function POST(req) {
             });
         } else {
             await Team.findByIdAndUpdate(team._id, {
-                $inc: { penaltySeconds: puzzle.penaltySecondsOnWrong },
+                $push: {
+                    submissionHistory: {
+                        puzzleId,
+                        timestamp: new Date(),
+                        isCorrect: false,
+                        answer: answer,
+                    }
+                }
             });
+
             return NextResponse.json({
                 correct: false,
-                message: `Wrong answer! -${Math.round(puzzle.penaltySecondsOnWrong / 60)} minute penalty applied.`,
-                penalty: puzzle.penaltySecondsOnWrong,
+                message: `Wrong answer! Try again.`,
             });
         }
     } catch (err) {

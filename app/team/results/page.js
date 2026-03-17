@@ -114,7 +114,7 @@ export default function ResultsPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 transition-all duration-700 delay-100 ${reveal ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+      <div className={`grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 transition-all duration-700 delay-100 ${reveal ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         style={{ transitionProperty: "opacity, transform" }}>
         <StatCard
           label="Puzzles Solved"
@@ -130,13 +130,7 @@ export default function ResultsPage() {
           color={data.accuracyPct >= 70 ? "text-terminal-green" : data.accuracyPct >= 40 ? "text-terminal-amber" : "text-terminal-red"}
           border={data.accuracyPct >= 70 ? "border-terminal-green/40" : "border-terminal-amber/40"}
         />
-        <StatCard
-          label="Penalty"
-          value={data.penaltyMinutes > 0 ? `-${data.penaltyMinutes}m` : "None"}
-          sub={data.penaltySeconds > 0 ? `${data.penaltySeconds}s total` : "clean run"}
-          color={data.penaltySeconds > 0 ? "text-terminal-red" : "text-terminal-green"}
-          border={data.penaltySeconds > 0 ? "border-terminal-red/40" : "border-terminal-green/40"}
-        />
+
         <StatCard
           label="Time Taken"
           value={formatTime(data.timeTakenSeconds)}
@@ -165,11 +159,6 @@ export default function ResultsPage() {
           </code>
           <span className="text-sm font-bold text-terminal-green">{data.solvedCount}/{data.totalPuzzles}</span>
         </div>
-        {data.penaltySeconds > 0 && (
-          <div className="mt-3 border border-terminal-red/30 rounded p-2 bg-red-950/10 text-terminal-red text-xs">
-            ⚠ {data.penaltySeconds}s of penalties accumulated ({data.penaltyMinutes} minute{data.penaltyMinutes !== 1 ? "s" : ""} deducted)
-          </div>
-        )}
       </div>
 
       {/* Puzzle breakdown */}

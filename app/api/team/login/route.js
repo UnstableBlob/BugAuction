@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
 import Counter from "@/models/Counter";
 import { setTeamCookie } from "@/lib/session";
+import Session from "@/models/Session";
 
 export async function POST(req) {
   try {
@@ -83,22 +84,22 @@ export async function POST(req) {
         { new: true },
       );
 
-      // Create new team — always land in waiting room first
+      const activeSession = await Session.findOne({ status: "started" }).sort({ startedAt: -1 }).lean();
+
+      // Create new team — always land in auctioning first
       const now = new Date();
 
       team = await Team.create({
         teamName: teamName.trim(),
         password: password,
         tid: counter.seq,
-        status: 'waiting',
+        status: 'auctioning',
         lastLoginAt: now,
         loginTime: now,
-        waitingRoomEnteredAt: now,
         assignedPuzzleIds: [],
-        activeSessionId: null,
+        activeSessionId: activeSession ? activeSession._id : null,
         currentIndex: 0,
         solvedPuzzleIds: [],
-        penaltySeconds: 0,
         gameStartTime: null,
       });
 
@@ -135,23 +136,21 @@ export async function POST(req) {
       team.tid = counter.seq;
     }
 
-    // Always put returning teams back to waiting — admin must approve them.
-    // This covers re-logins after a game ended, mid-session late-joins, etc.
+    // Put returning teams in auctioning
     const now = new Date();
+    const activeSession = await Session.findOne({ status: "started" }).sort({ startedAt: -1 }).lean();
+
     team.loginTime = now;
-    team.status = 'waiting';
-    team.waitingRoomEnteredAt = now;
+    team.status = 'auctioning';
     // Always clear old game state so they start fresh on next approval
     team.assignedPuzzleIds = [];
     team.currentIndex = 0;
     team.solvedPuzzleIds = [];
-    team.penaltySeconds = 0;
-    team.activeSessionId = null;
+    team.activeSessionId = activeSession ? activeSession._id : null;
     team.activeRoomId = null;
     team.gameStartTime = null;
     team.finishTime = null;
     team.finalScore = null;
-    team.finalPenalty = null;
     team.finalStatus = null;
     team.lastLoginAt = now;
     await team.save();

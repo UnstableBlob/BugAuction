@@ -122,7 +122,7 @@ export default function PastSessionsPage() {
                 <div className="terminal-card text-center py-12">
                     <div className="text-terminal-muted text-lg mb-2">📭 No past sessions yet</div>
                     <div className="text-terminal-muted text-xs">
-                        Past sessions appear here after you click "Clear Teams & Sessions" on the dashboard.
+                        Past sessions appear here after you click &quot;Clear Teams &amp; Sessions&quot; on the dashboard.
                     </div>
                 </div>
             ) : (
@@ -170,10 +170,7 @@ export default function PastSessionsPage() {
 
                                     {/* Quick stats bar */}
                                     <div className="flex flex-wrap gap-4 mt-2 text-xs">
-                                        <span className="text-terminal-muted">
-                                            Duration:{" "}
-                                            <span className="text-terminal-text font-bold">{h.durationMinutes}m</span>
-                                        </span>
+
                                         <span className="text-terminal-muted">
                                             Teams:{" "}
                                             <span className="text-terminal-amber font-bold">{lb.length}</span>
@@ -217,7 +214,6 @@ export default function PastSessionsPage() {
                                                             <th className="text-left px-3 py-2 font-normal">Team</th>
                                                             <th className="text-left px-3 py-2 font-normal">Status</th>
                                                             <th className="text-left px-3 py-2 font-normal">Solved</th>
-                                                            <th className="text-left px-3 py-2 font-normal">Penalty</th>
                                                             <th className="text-left px-3 py-2 font-normal">Time Taken</th>
                                                         </tr>
                                                     </thead>
@@ -267,16 +263,7 @@ export default function PastSessionsPage() {
                                                                     <span className="text-terminal-muted"> / {entry.totalPuzzles}</span>
                                                                 </td>
 
-                                                                {/* Penalty */}
-                                                                <td className="px-3 py-2">
-                                                                    {entry.penaltySeconds ? (
-                                                                        <span className="text-terminal-red">
-                                                                            -{Math.round(entry.penaltySeconds / 60)}m
-                                                                        </span>
-                                                                    ) : (
-                                                                        <span className="text-terminal-muted">—</span>
-                                                                    )}
-                                                                </td>
+
 
                                                                 {/* Time taken */}
                                                                 <td className="px-3 py-2 font-mono">
@@ -306,7 +293,7 @@ export default function PastSessionsPage() {
 
             {history.length > 0 && (
                 <div className="text-terminal-muted text-xs text-center mt-4">
-                    Rankings: Most solved → Least penalty → Fastest finish
+                    Rankings: Most solved → Fastest finish
                 </div>
             )}
         </main>
