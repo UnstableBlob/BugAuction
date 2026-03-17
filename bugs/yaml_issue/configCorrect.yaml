@@ -1,0 +1,50 @@
+seed:
+  base_value: 0xDEADBEEFCAFEBABE
+  salt: "Ω_entropy_prime_7"
+  iterations: 13
+
+fibonacci:
+  depth: 42
+  modulus: 1_000_000_007
+  twist_factor: 0x1F4A3B2C
+
+cipher:
+  caesar_shift: 17
+  vigenere_key: "ZyXwVuTsRqPoNmLkJiHgFeDcBa"
+
+matrix:
+  rows: 4
+  cols: 4
+  transform:
+    - [3, 1, 4, 1]
+    - [5, 9, 2, 6]
+    - [5, 3, 5, 8]
+    - [9, 7, 9, 3]
+  modulus: 251
+
+lfsr:
+  seed: 0xACE1
+  taps: [16, 14, 13, 11]
+  rounds: 256
+
+prime_sieve:
+  upper_bound: 10_000
+  pick_every_nth: 7
+
+merkle:
+  block_size: 8
+  iv: 0x6A09E667F3BCC908
+  round_constants: [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5]
+
+shuffle:
+  permutation_key: "ShadowCipher9741"
+  rounds: 5
+
+xor_diffusion:
+  key_stream: [0xA5, 0x3C, 0x69, 0x96, 0xF0, 0x0F, 0x55, 0xAA, 0xC3, 0x3C, 0x5A, 0xA5, 0xFF, 0x00, 0x0F, 0xF0]
+  passes: 3
+
+hash_fold:
+  fold_rounds: 4
+  golden_ratio_bits: 0x9E3779B97F4A7C15
+  output_length: 64

@@ -224,6 +224,32 @@ export default function GamePage() {
               {state.puzzle.prompt}
             </p>
 
+            {state.puzzle.uiConfig?.downloadUrl && (
+              <div className="mb-6">
+                <a
+                  href={state.puzzle.uiConfig.downloadUrl}
+                  download
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-terminal-green/10 border border-terminal-green text-terminal-green rounded hover:bg-terminal-green/20 transition-colors text-sm font-bold uppercase tracking-wider"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    ></path>
+                  </svg>
+                  Download Source Code (.zip)
+                </a>
+              </div>
+            )}
+
             {/* Puzzle Renderer */}
             {!state.isSolved ? (
               <PuzzleRenderer
