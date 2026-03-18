@@ -53,12 +53,32 @@ export default function AdminDashboard() {
 
   const [auctionPuzzleId, setAuctionPuzzleId] = useState("");
   const [auctionItemType, setAuctionItemType] = useState("puzzle");
+  const [maxPuzzlesPerTeam, setMaxPuzzlesPerTeam] = useState(5);
 
   const refreshAll = () => {
     mutateTeams();
     mutateLb();
     mutateAuction();
   };
+
+  async function saveMaxPuzzles() {
+    if (loading) return;
+    setLoading(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/session/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ maxPuzzlesPerTeam }),
+      });
+      const data = await res.json();
+      if (!res.ok) setMsg("Error: " + (data.error || "Failed to save"));
+      else setMsg(`✓ Max bugs/team set to ${data.maxPuzzlesPerTeam}`);
+    } catch {
+      setMsg("Network error");
+    }
+    setLoading(false);
+  }
 
   useEffect(() => {
     if (lbData?.leaderboard) {
@@ -320,6 +340,28 @@ export default function AdminDashboard() {
               <button onClick={clearSession} disabled={loading} className="btn-amber w-full disabled:opacity-30">
                 {loading ? "PROCESSING..." : "CLEAR TEAMS & SESSIONS"}
               </button>
+            </div>
+            {/* Max bugs per team */}
+            <div className="mt-3 border-t border-terminal-border pt-3">
+              <label className="text-terminal-muted text-xs block mb-1 uppercase tracking-wider">Max Bugs / Team</label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  value={maxPuzzlesPerTeam}
+                  onChange={(e) => setMaxPuzzlesPerTeam(parseInt(e.target.value) || 1)}
+                  className="terminal-input w-20 text-center font-mono"
+                />
+                <button
+                  onClick={saveMaxPuzzles}
+                  disabled={loading || !session || session.status !== "started"}
+                  className="btn-amber flex-1 text-xs disabled:opacity-30"
+                >
+                  SAVE
+                </button>
+              </div>
+              <div className="text-terminal-muted text-[10px] mt-1">Max puzzle bugs a single team can win at auction</div>
             </div>
           </div>
 

@@ -59,26 +59,43 @@ export async function POST(req) {
       if (winner) {
         // Deduct currency
         winner.currency -= winningBidAmount;
-        
+
         // Assign item based on type
         if (auction.itemType === "powercard") {
           if (!winner.assignedPowercardIds.includes(auction.puzzleId)) {
             winner.assignedPowercardIds.push(auction.puzzleId);
           }
         } else {
-          // Default to puzzle
+          // Puzzle — enforce max puzzle cap
+          // auction.sessionId is already the populated Session doc — use it directly
+          const sessionDoc = auction.sessionId;
+          const maxAllowed = (sessionDoc?.maxPuzzlesPerTeam != null) ? sessionDoc.maxPuzzlesPerTeam : 5;
+          const currentCount = winner.assignedPuzzleIds?.length || 0;
+
+          console.log(`[AuctionClose] team=${winner.teamName} puzzles=${currentCount} maxAllowed=${maxAllowed}`);
+
+          if (currentCount >= maxAllowed) {
+            // Cap reached: still deduct currency but don't assign puzzle
+            await winner.save();
+            return NextResponse.json({
+              message: `Auction closed. Winner has reached the max puzzle limit (${maxAllowed}) — puzzle not assigned.`,
+              auction,
+              capReached: true,
+            });
+          }
+
           if (!winner.assignedPuzzleIds.includes(auction.puzzleId)) {
             winner.assignedPuzzleIds.push(auction.puzzleId);
           }
 
-          // Also update session assignments mapping for puzzles
-          const session = await Session.findById(auction.sessionId);
-          if (session) {
-            const teamAssignments = session.assignments.get(winner.teamName) || [];
+          // Update session assignments mapping — fetch a fresh doc for write
+          const freshSession = await Session.findById(sessionDoc._id);
+          if (freshSession) {
+            const teamAssignments = freshSession.assignments.get(winner.teamName) || [];
             if (!teamAssignments.includes(auction.puzzleId)) {
               teamAssignments.push(auction.puzzleId);
-              session.assignments.set(winner.teamName, teamAssignments);
-              await session.save();
+              freshSession.assignments.set(winner.teamName, teamAssignments);
+              await freshSession.save();
             }
           }
         }
