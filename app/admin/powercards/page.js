@@ -9,19 +9,49 @@ const fetcher = (url) => fetch(url).then((res) => {
   return res.json();
 });
 
-export default function PowercardManagement() {
+export default function PowercardAssignments() {
   const router = useRouter();
-  const { data: teamsData, mutate: mutateTeams } = useSWR("/api/admin/teams", fetcher, { refreshInterval: 5000 });
-  const { data: powercardsData } = useSWR("/api/admin/powercards/list", fetcher);
-  
+  const { data, error, mutate } = useSWR("/api/admin/powercards/assignments", fetcher);
+
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
+  const [selectedTeams, setSelectedTeams] = useState({});
 
-  const teams = teamsData?.teams || [];
-  const allPowercards = powercardsData?.powercards || [];
+  if (error) return <div className="p-10 text-red-500">Failed to load powercard assignments</div>;
+  if (!data) return <div className="p-10 text-terminal-amber animate-pulse">Loading Powercard Data...</div>;
 
-  async function handleRemove(teamId, powercardId) {
-    if (!confirm("Are you sure you want to remove this powercard?")) return;
+  const { powercards, allTeams } = data;
+
+  async function handleAssign(powercardId) {
+    const teamId = selectedTeams[powercardId];
+    if (!teamId) {
+      setMsg("Error: Please select a team first");
+      return;
+    }
+
+    setLoading(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/powercards/assign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ powercardId, teamId }),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        setMsg("Error: " + result.error);
+      } else {
+        setMsg(`✓ Powercard assigned to ${result.teamName}`);
+        mutate(); // Refresh the data
+      }
+    } catch (e) {
+      setMsg("Network error");
+    }
+    setLoading(false);
+  }
+
+  async function handleRemove(teamId, powercardId, teamName) {
+    if (!confirm(`Remove this powercard from ${teamName}?`)) return;
 
     setLoading(true);
     setMsg("");
@@ -35,14 +65,18 @@ export default function PowercardManagement() {
       if (!res.ok) {
         setMsg("Error: " + (result.error || "Failed to remove"));
       } else {
-        setMsg(`✓ Powercard removed`);
-        mutateTeams(); 
+        setMsg("✓ Powercard removed");
+        mutate();
       }
     } catch (e) {
       setMsg("Network error");
     }
     setLoading(false);
   }
+
+  const handleSelectChange = (powercardId, teamId) => {
+    setSelectedTeams((prev) => ({ ...prev, [powercardId]: teamId }));
+  };
 
   return (
     <main className="min-h-screen p-4 max-w-7xl mx-auto">
@@ -57,7 +91,7 @@ export default function PowercardManagement() {
             PARAALLAX — ADMIN
           </div>
           <div className="text-terminal-muted text-xs uppercase tracking-wider">
-            Powercard Management Panel
+            Powercard Assignments Panel
           </div>
         </div>
         <button
@@ -82,64 +116,72 @@ export default function PowercardManagement() {
 
       {/* Main Table */}
       <div className="terminal-card">
-        <div className="terminal-header">Team Powercards</div>
+        <div className="terminal-header">Powercard Assignments</div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-terminal-border text-terminal-muted">
-                <th className="text-left px-4 py-3 font-normal">Team Name</th>
-                <th className="text-left px-4 py-3 font-normal">Owned Powercards</th>
+                <th className="text-left px-4 py-3 font-normal">Powercard (ID)</th>
+                <th className="text-left px-4 py-3 font-normal">Assigned Teams</th>
+                <th className="text-left px-4 py-3 font-normal">Add Assignment</th>
               </tr>
             </thead>
             <tbody>
-              {teams.map((team) => (
+              {powercards.map((pc) => (
                 <tr
-                  key={team._id}
+                  key={pc.id}
                   className="border-b border-terminal-border/30 hover:bg-terminal-border/10 transition-colors"
                 >
                   <td className="px-4 py-4 align-top">
-                    <div className="text-terminal-green font-bold">{team.teamName}</div>
-                    <div className="text-terminal-muted text-xs">ID: {team.tid || team._id}</div>
+                    <div className="text-terminal-amber font-bold">{pc.name}</div>
+                    <div className="text-terminal-muted text-xs">{pc.id}</div>
+                    {pc.timing && (
+                      <div className="text-terminal-muted text-xs italic mt-0.5">{pc.timing}</div>
+                    )}
                   </td>
                   <td className="px-4 py-4 align-top">
-                    <div className="flex flex-wrap gap-4">
-                      {team.assignedPowercardIds && team.assignedPowercardIds.length > 0 ? (
-                        team.assignedPowercardIds.map((pcId, idx) => {
-                          const pc = allPowercards.find(p => p.id === pcId);
-                          return (
-                            <div
-                              key={`${team._id}-${pcId}-${idx}`}
-                              className="relative flex flex-col items-center gap-1 bg-amber-950/20 border border-terminal-amber/30 rounded p-2 w-36"
+                    <div className="flex flex-wrap gap-2">
+                      {pc.assignedTeams && pc.assignedTeams.length > 0 ? (
+                        pc.assignedTeams.map((team) => (
+                          <span
+                            key={team._id}
+                            className="inline-flex items-center gap-1 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green px-2 py-0.5 rounded text-xs"
+                          >
+                            {team.teamName}
+                            <button
+                              onClick={() => handleRemove(team._id, pc.id, team.teamName)}
+                              disabled={loading}
+                              title="Remove from team"
+                              className="ml-1 text-red-400 hover:text-red-300 disabled:opacity-50 leading-none"
                             >
-                              {pc?.image && (
-                                <img
-                                  src={pc.image}
-                                  alt={pc?.name || pcId}
-                                  className="w-24 h-24 object-contain rounded"
-                                />
-                              )}
-                              <div className="text-terminal-amber text-[11px] font-bold text-center leading-tight">
-                                {pc?.name || pcId}
-                              </div>
-                              {pc?.timing && (
-                                <div className="text-terminal-muted text-[9px] text-center italic">
-                                  {pc.timing}
-                                </div>
-                              )}
-                              <button
-                                onClick={() => handleRemove(team._id, pcId)}
-                                disabled={loading}
-                                className="mt-1 w-full text-[10px] font-bold py-0.5 border border-red-500/50 text-red-400 hover:bg-red-900/30 rounded transition-colors"
-                                title="Mark as Used / Remove"
-                              >
-                                ✕ USED
-                              </button>
-                            </div>
-                          );
-                        })
+                              ✕
+                            </button>
+                          </span>
+                        ))
                       ) : (
-                        <span className="text-terminal-muted italic text-xs">No powercards owned</span>
+                        <span className="text-terminal-muted italic text-xs">No teams assigned</span>
                       )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 align-top">
+                    <div className="flex gap-2">
+                      <select
+                        className="terminal-input bg-black text-xs py-1"
+                        value={selectedTeams[pc.id] || ""}
+                        onChange={(e) => handleSelectChange(pc.id, e.target.value)}
+                      >
+                        <option value="">-- Choose Team --</option>
+                        {allTeams.map((team) => (
+                          <option key={team._id} value={team._id}>{team.teamName}</option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => handleAssign(pc.id)}
+                        disabled={loading}
+                        className="btn-amber text-xs px-3 py-1 whitespace-nowrap"
+                      >
+                        {loading ? "..." : "Assign"}
+                      </button>
                     </div>
                   </td>
                 </tr>
