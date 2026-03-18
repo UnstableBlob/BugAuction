@@ -4,10 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 
-const fetcher = (url) => fetch(url).then((res) => {
-  if (res.status === 401 || res.status === 403 || res.status === 404) throw new Error("Unauthorized");
-  return res.json();
-});
+const fetcher = (url) =>
+  fetch(url).then((res) => {
+    if (res.status === 401 || res.status === 403 || res.status === 404)
+      throw new Error("Unauthorized");
+    return res.json();
+  });
+
+const PIXEL_FONT = "'PokéPixel', 'Courier New', monospace";
 
 export default function AuctionPage() {
   const router = useRouter();
@@ -19,15 +23,15 @@ export default function AuctionPage() {
   const [submitting, setSubmitting] = useState(false);
   const [teamName, setTeamName] = useState("");
 
-  const { data, error, mutate } = useSWR("/api/team/auction/state", fetcher, { refreshInterval: 3000 });
+  const { data, error, mutate } = useSWR("/api/team/auction/state", fetcher, {
+    refreshInterval: 3000,
+  });
 
   useEffect(() => {
     fetch("/api/team/me")
       .then((r) => r.json())
-      .then((d) => {
-        if (d.teamName) setTeamName(d.teamName);
-      })
-      .catch(() => {});
+      .then((d) => { if (d.teamName) setTeamName(d.teamName); })
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -36,19 +40,9 @@ export default function AuctionPage() {
       return;
     }
     if (data) {
-      if (data.status === "playing") {
-        router.push("/team/game");
-        return;
-      }
-      if (data.status === "success") {
-        router.push("/team/success");
-        return;
-      }
-      if (data.status === "caught") {
-        router.push("/team/caught");
-        return;
-      }
-
+      if (data.status === "playing") { router.push("/team/game"); return; }
+      if (data.status === "success") { router.push("/team/success"); return; }
+      if (data.status === "caught") { router.push("/team/caught"); return; }
       if (data.status === "auctioning" || data.status === "waiting") {
         setCurrency(data.currency || 0);
         setAuctionState(data.auction);
@@ -59,8 +53,9 @@ export default function AuctionPage() {
 
   async function submitBid(e) {
     e.preventDefault();
-    if (!bidAmount || isNaN(bidAmount) || parseInt(bidAmount) <= 0) {
-      setMsg("Please enter a valid bid amount.");
+    const minBid = auctionState?.itemType === "powercard" ? (puzzle?.points || 1) : 1;
+    if (!bidAmount || isNaN(bidAmount) || parseInt(bidAmount) < minBid) {
+      setMsg(auctionState?.itemType === "powercard" ? `Min bid is ${minBid} ₵` : "Invalid bid.");
       return;
     }
     setSubmitting(true);
@@ -71,11 +66,11 @@ export default function AuctionPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: parseInt(bidAmount) }),
       });
-      const data = await res.json();
+      const resData = await res.json();
       if (!res.ok) {
-        setMsg("Error: " + data.error);
+        setMsg("Error: " + resData.error);
       } else {
-        setMsg("✓ Bid placed successfully!");
+        setMsg("✓ Bid placed!");
         setBidAmount("");
         mutate();
       }
@@ -85,130 +80,272 @@ export default function AuctionPage() {
     setSubmitting(false);
   }
 
+  // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-terminal-muted animate-pulse">LOADING AUCTION INTERFACE...</div>
-      </main>
+      <div style={styles.loadingWrap}>
+        <div style={styles.loadingText}>LOADING AUCTION INTERFACE...</div>
+      </div>
     );
   }
 
+  const puzzle = auctionState?.puzzle;
+  const targetName = puzzle?.title || "---";
+  const promptText = puzzle?.prompt || "";
+  const isOpen = auctionState?.status === "open";
+  const hasBid = auctionState?.hasBid;
+  const isClosed = auctionState && !isOpen;
+  const noAuction = !auctionState;
+
   return (
-    <main className="min-h-screen flex flex-col p-4 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-           <div className="text-terminal-amber text-2xl font-bold tracking-widest" style={{ textShadow: "0 0 10px #ffb000" }}>
-              SILENT AUCTION
-           </div>
-           <div className="text-terminal-muted text-xs uppercase">
-              {teamName ? `TEAM: ${teamName}` : "TEAM INTERFACE"}
-           </div>
-        </div>
-        <div className="terminal-card py-2 px-4 shadow-amber">
-          <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">Currency Balance</div>
-          <div className="text-terminal-amber text-xl font-bold">{currency} <span className="text-xs">COINS</span></div>
+    <div style={styles.page}>
+      <div style={styles.battleWrap}>
+        <div style={styles.battleContainer}>
+          <img
+            src="/images/auction_bg.png"
+            alt="Auction Background"
+            style={styles.bgImg}
+            draggable={false}
+          />
+
+          {/* ══ CONTAINER 1: Team & Balance (top-left beige box) ══ */}
+          {/* Team name — mapped to the right of "TEAM:" */}
+          <div style={{ ...styles.zone, top: "6.5%", left: "18%", textAlign: "left" }}>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(9px, 1.5vw, 18px)", color: "#2c2c2c", letterSpacing: "1px", textTransform: "uppercase" }}>
+              {teamName || "---"}
+            </span>
+          </div>
+
+          {/* Currency balance — centered in the bottom half of the left box */}
+          <div style={{ ...styles.zone, top: "15%", left: "4%", width: "28%", textAlign: "center" }}>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(11px, 2vw, 22px)", color: "#2c2c2c", letterSpacing: "1px" }}>
+              ₵ {currency}
+            </span>
+          </div>
+
+          {/* ══ CONTAINER 2: Bidding details (top-right beige box) ══ */}
+          {/* Target name — Top-centered header area */}
+          <div style={{ ...styles.zone, top: "5.5%", left: "36%", width: "61%", textAlign: "center" }}>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(9px, 1.6vw, 18px)", color: "#2c2c2c", letterSpacing: "1px", textTransform: "uppercase" }}>
+              {targetName}
+            </span>
+          </div>
+
+          {/* COST value — shown only for powercard auctions */}
+          <div style={{ ...styles.zone, top: "17.5%", left: "47%", textAlign: "left" }}>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(9px, 1.5vw, 18px)", color: "#2c2c2c", letterSpacing: "1px" }}>
+              {auctionState?.itemType === "powercard" ? (puzzle?.points ?? "") : ""}
+            </span>
+          </div>
+
+          {/* REWARD value — shown only for puzzle auctions */}
+          <div style={{ ...styles.zone, top: "17.5%", left: "88%", textAlign: "left" }}>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(9px, 1.5vw, 18px)", color: "#2c2c2c", letterSpacing: "1px" }}>
+              {auctionState?.itemType !== "powercard" ? (puzzle?.points ?? "") : ""}
+            </span>
+          </div>
+
+          {/* ── Bid Input / State Displays ── */}
+          {noAuction && (
+            <div style={{ ...styles.zone, top: "34%", left: "36%", width: "61%", textAlign: "center" }}>
+              <span style={{ ...styles.pixelText, fontSize: "clamp(9px, 1.5vw, 18px)", color: "#8a7040" }}>
+                WAITING FOR NEXT AUCTION...
+              </span>
+            </div>
+          )}
+
+          {isOpen && !hasBid && (
+            <>
+              {/* Invisible input mapped perfectly over the white rect inside the gold box */}
+              <form
+                onSubmit={submitBid}
+                style={{ ...styles.zone, top: "32.5%", left: "50.5%", width: "32%", height: "8.5%", display: "flex", alignItems: "center" }}
+              >
+                <input
+                  type="number"
+                  min={auctionState?.itemType === "powercard" ? (puzzle?.points || 1) : 1}
+                  max={currency}
+                  value={bidAmount}
+                  onChange={(e) => setBidAmount(e.target.value)}
+                  placeholder={auctionState?.itemType === "powercard" ? `≥${puzzle?.points}` : "0"}
+                  autoComplete="off"
+                  disabled={submitting}
+                  style={styles.bidInput}
+                />
+              </form>
+
+              {/* Invisible submit mapped over the "PLACE SECRET BID" button graphic */}
+              <button
+                onClick={submitBid}
+                disabled={submitting || !bidAmount}
+                style={{
+                  ...styles.zone,
+                  top: "46.5%",
+                  left: "49.5%",
+                  width: "37.5%",
+                  height: "9%",
+                  background: "transparent",
+                  border: "none",
+                  cursor: submitting || !bidAmount ? "not-allowed" : "pointer",
+                  opacity: submitting || !bidAmount ? 0.35 : 1,
+                  pointerEvents: "auto",
+                }}
+              />
+            </>
+          )}
+
+          {isOpen && hasBid && (
+            /* Bid confirmed text — overlaid inside the white input box */
+            <>
+              <div style={{ ...styles.zone, top: "33%", left: "50.5%", width: "32%", height: "8.5%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 15px)", color: "#1e824c", letterSpacing: "1px" }}>
+                  ✓ BID SECURED
+                </span>
+              </div>
+              <div style={{ ...styles.zone, top: "43%", left: "36%", width: "61%", textAlign: "center" }}>
+                <span style={{ ...styles.pixelText, fontSize: "clamp(7px, 1vw, 13px)", color: "#8a7040", letterSpacing: "0.5px" }}>
+                  {auctionState.myBid} ₵ PLACED — WAITING FOR CLOSURE...
+                </span>
+              </div>
+            </>
+          )}
+
+          {isClosed && (
+            /* Auction Closed — Centered in the middle of the right box */
+            <div style={{ ...styles.zone, top: "27.5%", left: "36%", width: "61%", height: "20%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+              <span style={{ ...styles.pixelText, fontSize: "clamp(9px, 1.5vw, 18px)", color: "#2c2c2c", letterSpacing: "1px" }}>
+                AUCTION CLOSED
+              </span>
+              <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 15px)", color: "#5a4010" }}>
+                WINNER: {auctionState.winnerTeamName || "NONE"}
+              </span>
+            </div>
+          )}
+
+          {/* Feedback messages (Errors, etc.) - placed safely between input and button */}
+          {msg && !msg.includes("✓") && (
+            <div style={{ ...styles.zone, top: "42.5%", left: "36%", width: "61%", textAlign: "center" }}>
+              <span style={{
+                ...styles.pixelText,
+                fontSize: "clamp(7px, 1.1vw, 13px)",
+                color: "#cc2222",
+                letterSpacing: "0.5px",
+              }}>
+                {msg}
+              </span>
+            </div>
+          )}
+
+          {/* ══ CONTAINER 3: Dialog box (bottom blue strip) ══ */}
+          {/* Text begins just past the CD icon on the left */}
+          <div style={{ ...styles.zone, top: "65%", left: "17%", width: "78%", height: "26%", overflow: "hidden", textAlign: "left" }}>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(9px, 1.4vw, 25px)", color: "#ffffff", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+              {promptText ||
+                (noAuction
+                  ? "Waiting for the next puzzle to be auctioned by the admin."
+                  : "Enter your secret bid carefully. You only get one chance!"
+                )
+              }
+            </span>
+          </div>
+
         </div>
       </div>
 
-      {!auctionState ? (
-         <div className="terminal-card text-center py-12">
-            <div className="text-terminal-muted animate-pulse mb-4">
-               Waiting for the admin to start the next puzzle auction...
-            </div>
-            <div className="inline-block animate-spin text-terminal-amber">◌</div>
-         </div>
-      ) : (
-         <div className="terminal-card border-amber-500/50">
-            <div className="terminal-header text-amber-500">
-               {auctionState.status === "open" ? "LIVE AUCTION: Bidding Open" : "AUCTION CLOSED: Results"}
-            </div>
-
-            {/* Item Details */}
-            {auctionState.puzzle && (
-               <div className="mb-6 p-4 border border-terminal-border bg-black/50 rounded">
-                  <div className="text-terminal-green text-sm uppercase tracking-wider mb-2 font-bold">
-                    {auctionState.itemType === 'powercard' ? 'Special Asset: Power Card' : 'Priority Target: Puzzle'}
-                  </div>
-                  {/* Show card image if powercard */}
-                  {auctionState.itemType === 'powercard' && auctionState.puzzle.image && (
-                    <div className="flex justify-center mb-3">
-                      <img
-                        src={auctionState.puzzle.image}
-                        alt={auctionState.puzzle.title}
-                        className="w-32 h-32 object-contain rounded border border-terminal-amber/20"
-                      />
-                    </div>
-                  )}
-                  <div className="text-xl font-bold mb-2 text-white">{auctionState.puzzle.title}</div>
-                  <div className="flex gap-4 mb-2">
-                     <div className="text-[10px] font-bold px-2 py-0.5 bg-green-500/10 text-green-500 border border-green-500/20 rounded uppercase tracking-tighter">
-                        {auctionState.itemType === 'powercard' ? `Cost: ${auctionState.puzzle.points} ₵` : `Reward: ${auctionState.puzzle.points} PTS`}
-                     </div>
-                     {auctionState.puzzle.timing && (
-                       <div className="text-[10px] px-2 py-0.5 bg-amber-500/10 text-terminal-amber border border-terminal-amber/20 rounded italic">
-                         {auctionState.puzzle.timing}
-                       </div>
-                     )}
-                  </div>
-                  <div className="text-terminal-muted text-sm italic">{auctionState.puzzle.prompt}</div>
-               </div>
-            )}
-
-            {/* Auction Status and Action */}
-            {auctionState.status === "open" && !auctionState.hasBid ? (
-               // Needs to bid
-               <div className="bg-amber-950/20 border border-amber-500/30 p-6 rounded">
-                  <div className="flex justify-between items-center mb-4">
-                     <span className="text-sm text-terminal-muted">Enter your secret bid carefully. You only get one chance!</span>
-                  </div>
-                  <form onSubmit={submitBid} className="flex gap-4">
-                     <input 
-                        type="number" 
-                        min="1" 
-                        max={currency}
-                        value={bidAmount}
-                        onChange={(e) => setBidAmount(e.target.value)}
-                        placeholder="Amt..."
-                        className="terminal-input w-32 text-xl !py-2"
-                        disabled={submitting}
-                     />
-                     <button type="submit" disabled={submitting || !bidAmount} className="btn-amber flex-1 py-3 text-lg font-bold">
-                        {submitting ? "SUBMITTING..." : "PLACE SECRET BID"}
-                     </button>
-                  </form>
-                  {msg && (
-                     <div className={`mt-4 text-xs ${msg.includes("✓") ? "text-terminal-green" : "text-terminal-red"}`}>
-                        {msg}
-                     </div>
-                  )}
-               </div>
-            ) : auctionState.status === "open" && auctionState.hasBid ? (
-               // Already bid
-               <div className="bg-green-950/20 border border-green-500/30 p-6 rounded text-center">
-                  <div className="text-terminal-green text-xl font-bold mb-2">BID SECURED</div>
-                  <div className="text-terminal-muted mb-4">You have secretly bid <span className="text-terminal-amber font-bold">{auctionState.myBid}</span> coins on this puzzle.</div>
-                  <div className="text-terminal-muted text-xs animate-pulse">Waiting for other teams and admin closure...</div>
-               </div>
-            ) : (
-               // Auction Closed / Results
-               <div className={`p-6 rounded text-center border ${auctionState.winnerTeamName === teamName ? "bg-green-950/20 border-green-500/50" : "bg-red-950/20 border-red-500/30"}`}>
-                  <div className="text-xl font-bold mb-2 uppercase tracking-wider text-white">Auction Concluded</div>
-                  <div className="text-terminal-muted mb-4">
-                     Winning Team: <span className="text-terminal-amber font-bold">{auctionState.winnerTeamName || "No Bidders"}</span><br/>
-                     Winning Bid: <span className="text-terminal-amber">{auctionState.winningBid || "0"}</span> coins
-                  </div>
-                  
-             {auctionState.winnerTeamName === teamName ? (
-                <div className="text-terminal-green font-bold glow-text">ASSET ACQUIRED! {auctionState.itemType === 'powercard' ? 'Check your inventory.' : 'Puzzle added to your queue.'}</div>
-             ) : (
-                <div className="text-terminal-red">Asset missed. Better luck on the next auction.</div>
-             )}
-                  
-                  <div className="mt-6 text-terminal-muted text-xs animate-pulse">Waiting for next auction...</div>
-               </div>
-            )}
-         </div>
-      )}
-    </main>
+      <div style={styles.infoStrip}>
+        <span style={styles.infoItem}>💰 Balance: {currency} ₵</span>
+        {auctionState && <span style={styles.infoItem}>📦 {isOpen ? "BIDDING OPEN" : "AUCTION CLOSED"}</span>}
+        {puzzle?.points != null && <span style={styles.infoItem}>⭐ {auctionState?.itemType === "powercard" ? `Cost: ${puzzle.points}` : `Reward: ${puzzle.points} pts`}</span>}
+      </div>
+    </div>
   );
 }
+
+// ─── Styles ────────────────────────────────────────────────────────────────────
+const styles = {
+  loadingWrap: {
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#0a0a0a",
+  },
+  loadingText: {
+    fontFamily: PIXEL_FONT,
+    color: "#ffb000",
+    fontSize: 18,
+    letterSpacing: 2,
+  },
+  page: {
+    minHeight: "100vh",
+    background: "#0a0a0a",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "stretch",
+    padding: 0,
+    gap: 0,
+  },
+  battleWrap: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    background: "#0a0a0a",
+    overflow: "hidden",
+  },
+  battleContainer: {
+    position: "relative",
+    height: "100vh",
+    width: "auto",
+    aspectRatio: "1320 / 990",
+    userSelect: "none",
+    flexShrink: 0,
+  },
+  bgImg: {
+    display: "block",
+    width: "100%",
+    height: "100%",
+    objectFit: "fill",
+    imageRendering: "pixelated",
+  },
+  zone: {
+    position: "absolute",
+    pointerEvents: "none",
+  },
+  pixelText: {
+    fontFamily: PIXEL_FONT,
+    display: "inline-block",
+    imageRendering: "pixelated",
+    textShadow: "1px 1px 0 rgba(0,0,0,0.28)",
+  },
+  bidInput: {
+    background: "transparent",
+    border: "none",
+    outline: "none",
+    color: "#2c2c2c",
+    fontFamily: PIXEL_FONT,
+    fontSize: "clamp(12px, 2.2vw, 24px)",
+    width: "100%",
+    textAlign: "center",
+    letterSpacing: "2px",
+    caretColor: "#2c2c2c",
+    pointerEvents: "auto",
+    MozAppearance: "textfield", // Hide spinner arrows on Firefox
+  },
+  infoStrip: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-around",
+    flexWrap: "wrap",
+    gap: 4,
+    background: "#111",
+    borderTop: "1px solid #3a2e00",
+    padding: "5px 12px",
+    flexShrink: 0,
+  },
+  infoItem: {
+    fontFamily: PIXEL_FONT,
+    fontSize: 11,
+    color: "#ffcc44",
+    letterSpacing: 1,
+  },
+};

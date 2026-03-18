@@ -96,7 +96,6 @@ export async function GET(req) {
 
         return NextResponse.json({
             status: 'playing',
-            teamName: freshTeam.name || freshTeam.username || 'TEAM',
             timeSinceStart,
             hasActiveAuction,
             hasBidInActiveAuction,

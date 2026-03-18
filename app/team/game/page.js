@@ -17,11 +17,19 @@ export default function GamePage() {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [navigating, setNavigating] = useState(false);
+  const [teamName, setTeamName] = useState("");
   const timerRef = useRef(null);
 
   const { data, error, mutate } = useSWR("/api/team/state", fetcher, {
     refreshInterval: 3000,
   });
+
+  useEffect(() => {
+    fetch("/api/team/me")
+      .then((r) => r.json())
+      .then((d) => { if (d.teamName) setTeamName(d.teamName); })
+      .catch(() => { });
+  }, []);
 
   useEffect(() => {
     if (error && error.message === "Unauthorized") {
@@ -125,7 +133,7 @@ export default function GamePage() {
   const puzzle = state.puzzle;
   const enemyName = puzzle?.title || "???";
   const enemyLevel = puzzle ? `${state.currentIndex + 1}` : "?";
-  const playerName = state.teamName || "TEAM";
+  const playerName = teamName || "TEAM";
   const promptText = puzzle?.prompt || "";
 
   return (
@@ -180,7 +188,7 @@ export default function GamePage() {
           {!state.isSolved && (
             <form
               onSubmit={handleSubmit}
-              style={{ ...styles.zone, top: "85%", left: "5%", width: "51%", height: "8%", display: "flex", alignItems: "center", gap: "6px" }}
+              style={{ ...styles.zone, top: "84%", left: "5%", width: "51%", height: "8%", display: "flex", alignItems: "center", gap: "6px" }}
             >
               <span style={{ ...styles.pixelText, color: "#2c2c2c", fontSize: "clamp(9px, 1.5vw, 16px)", marginLeft: "8px" }}>▶</span>
               <input
@@ -226,8 +234,8 @@ export default function GamePage() {
               download
               style={{ ...styles.navBtn, top: "69%", left: "62.5%" }}
             >
-              <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 14px)", color: "#2c2c2c", fontWeight: "bold" }}>DOWNLOAD</span>
-              <span style={{ ...styles.pixelText, fontSize: "clamp(6px, 0.9vw, 10px)", color: "#555", marginTop: "2px" }}>(SOURCE)</span>
+              <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 18px)", color: "#2c2c2c", fontWeight: "bold" }}>DOWNLOAD</span>
+              <span style={{ ...styles.pixelText, fontSize: "clamp(6px, 0.9vw, 14px)", color: "#555", marginTop: "2px" }}>(SOURCE)</span>
             </a>
           ) : (
             <div style={{ ...styles.navBtn, top: "69%", left: "60.5%", opacity: 0.4 }}>
@@ -241,7 +249,7 @@ export default function GamePage() {
             disabled={!answer.trim() || submitting || state.isSolved}
             style={{ ...styles.navBtn, top: "69%", left: "80.5%", opacity: (!answer.trim() || submitting || state.isSolved) ? 0.4 : 1 }}
           >
-            <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 14px)", color: "#2c2c2c", fontWeight: "bold" }}>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 18px)", color: "#2c2c2c", fontWeight: "bold" }}>
               {submitting ? "..." : "SUBMIT"}
             </span>
           </button>
@@ -252,7 +260,7 @@ export default function GamePage() {
             disabled={state.currentIndex === 0 || navigating}
             style={{ ...styles.navBtn, top: "80%", left: "60.5%", opacity: (state.currentIndex === 0 || navigating) ? 0.4 : 1 }}
           >
-            <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 14px)", color: "#2c2c2c", fontWeight: "bold" }}>PREV</span>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 18px)", color: "#2c2c2c", fontWeight: "bold" }}>PREV</span>
           </button>
 
           {/* Bottom-right: NEXT */}
@@ -367,6 +375,7 @@ const styles = {
     fontFamily: PIXEL_FONT,
     display: "inline-block",
     imageRendering: "pixelated",
+    textShadow: "1px 1px 0 rgba(0,0,0,0.28)",
   },
   answerInput: {
     background: "transparent",
