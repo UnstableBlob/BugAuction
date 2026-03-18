@@ -17,6 +17,7 @@ const SessionSchema = new mongoose.Schema(
       default: {},
     },
     teamNames: [{ type: String }],
+    maxPuzzlesPerTeam: { type: Number, default: 5 },
   },
   { timestamps: true },
 );
