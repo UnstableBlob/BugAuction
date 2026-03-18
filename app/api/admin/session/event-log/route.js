@@ -42,11 +42,19 @@ export async function GET(req) {
       }
       if (t.submissionHistory && t.submissionHistory.length > 0) {
         for (const sub of t.submissionHistory) {
+          const formattedAnswer = typeof sub.answer === 'string'
+            ? sub.answer
+            : JSON.stringify(sub.answer);
+          const hasVerdict = typeof sub.isCorrect === 'boolean';
+          const eventType = hasVerdict ? (sub.isCorrect ? 'solve' : 'submit') : 'submit';
+          const eventDetail = hasVerdict
+            ? (sub.isCorrect ? `Solved puzzle ${sub.puzzleId}` : `Incorrect answer on ${sub.puzzleId} (${formattedAnswer})`)
+            : `Submitted answer on ${sub.puzzleId} (${formattedAnswer})`;
           events.push({ 
-            type: sub.isCorrect ? 'solve' : 'submit', 
+            type: eventType,
             timestamp: new Date(sub.timestamp).getTime(), 
             teamName: t.teamName, 
-            detail: sub.isCorrect ? `Solved puzzle ${sub.puzzleId}` : `Incorrect answer on ${sub.puzzleId} (${sub.answer})` 
+            detail: eventDetail,
           });
         }
       }

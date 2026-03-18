@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getTeamFromRequest } from '@/lib/auth';
-import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
-import { getPuzzleById, checkAnswer } from '@/lib/puzzles';
+import { getPuzzleById } from '@/lib/puzzles';
+import AnswerSubmission from '@/models/AnswerSubmission';
 
 export async function POST(req) {
     try {
@@ -23,56 +23,35 @@ export async function POST(req) {
         const puzzle = getPuzzleById(puzzleId);
         if (!puzzle) return NextResponse.json({ error: 'Puzzle not found' }, { status: 404 });
 
-        // Already solved?
-        if (team.solvedPuzzleIds.includes(puzzleId)) {
-            return NextResponse.json({ correct: true, message: 'Already solved!', alreadySolved: true });
-        }
+        const submissionTimestamp = new Date();
 
-        const { correct: isCorrect } = checkAnswer(puzzleId, answer);
+        // Persist every single submitted answer as an immutable audit record.
+        await AnswerSubmission.create({
+            teamId: team._id,
+            teamName: team.teamName,
+            sessionId: team.activeSessionId || null,
+            puzzleId,
+            answer,
+            submittedAt: submissionTimestamp,
+        });
 
-        if (isCorrect) {
-            const newSolved = [...team.solvedPuzzleIds, puzzleId];
-            const allSolved = newSolved.length >= team.assignedPuzzleIds.length;
-            let dbUpdate = {
-                solvedPuzzleIds: newSolved,
-                status: allSolved ? 'success' : 'playing',
-                $inc: { score: puzzle.points || 0 },
-                $push: {
-                    submissionHistory: {
-                        puzzleId,
-                        timestamp: new Date(),
-                        isCorrect: true,
-                        answer: answer,
-                    }
+        // Keep lightweight history on team doc for existing admin timeline/event-log flows.
+        await Team.findByIdAndUpdate(team._id, {
+            $push: {
+                submissionHistory: {
+                    puzzleId,
+                    timestamp: submissionTimestamp,
+                    isCorrect: null,
+                    answer,
                 }
-            };
-            if (allSolved) {
-                dbUpdate.finishTime = new Date();
             }
-            await Team.findByIdAndUpdate(team._id, dbUpdate);
-            return NextResponse.json({
-                correct: true,
-                message: allSolved ? 'All puzzles solved! Mission complete.' : 'Correct! Puzzle unlocked.',
-                allSolved,
-                solvedCount: newSolved.length,
-            });
-        } else {
-            await Team.findByIdAndUpdate(team._id, {
-                $push: {
-                    submissionHistory: {
-                        puzzleId,
-                        timestamp: new Date(),
-                        isCorrect: false,
-                        answer: answer,
-                    }
-                }
-            });
+        });
 
-            return NextResponse.json({
-                correct: false,
-                message: `Wrong answer! Try again.`,
-            });
-        }
+        return NextResponse.json({
+            recorded: true,
+            message: 'Answer recorded.',
+            puzzleId,
+        });
     } catch (err) {
         console.error('Submit error:', err);
         return NextResponse.json({ error: 'Server error' }, { status: 500 });

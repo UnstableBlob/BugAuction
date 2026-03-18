@@ -33,8 +33,9 @@ const TeamSchema = new mongoose.Schema(
     submissionHistory: [{
       puzzleId: String,
       timestamp: { type: Date, default: Date.now },
-      isCorrect: Boolean,
-      answer: String,
+      // Kept for backward compatibility in admin event log/history.
+      isCorrect: { type: Boolean, default: null },
+      answer: mongoose.Schema.Types.Mixed,
     }],
     lastLoginAt: { type: Date, default: null },
     finishTime: { type: Date, default: null },
