@@ -6,6 +6,7 @@ import Team from '@/models/Team';
 import Auction from '@/models/Auction';
 import { getCache, setCache } from '@/lib/cache';
 import { getPowercardById } from '@/lib/powercards';
+import { getPuzzleById } from '@/lib/puzzles';
 
 export async function GET(req) {
     try {
@@ -95,6 +96,7 @@ export async function GET(req) {
 
         return NextResponse.json({
             status: 'playing',
+            teamName: freshTeam.name || freshTeam.username || 'TEAM',
             timeSinceStart,
             hasActiveAuction,
             hasBidInActiveAuction,

@@ -2,31 +2,26 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import PuzzleRenderer from "@/components/PuzzleRenderer";
 import useSWR from "swr";
 
-const fetcher = (url) => fetch(url).then((res) => {
-  if (res.status === 401) throw new Error("Unauthorized");
-  return res.json();
-});
-
-function formatTime(seconds) {
-  if (seconds <= 0) return "00:00:00";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":");
-}
+const fetcher = (url) =>
+  fetch(url).then((res) => {
+    if (res.status === 401) throw new Error("Unauthorized");
+    return res.json();
+  });
 
 export default function GamePage() {
   const router = useRouter();
   const [state, setState] = useState(null);
+  const [answer, setAnswer] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [navigating, setNavigating] = useState(false);
   const timerRef = useRef(null);
 
-  const { data, error, mutate } = useSWR("/api/team/state", fetcher, { refreshInterval: 3000 });
+  const { data, error, mutate } = useSWR("/api/team/state", fetcher, {
+    refreshInterval: 3000,
+  });
 
   useEffect(() => {
     if (error && error.message === "Unauthorized") {
@@ -34,78 +29,54 @@ export default function GamePage() {
       return;
     }
     if (data) {
-      if (data.status === "success") {
-        router.push("/team/success");
-        return;
-      }
-      if (data.status === "caught") {
-        router.push("/team/caught");
-        return;
-      }
-      if (data.status === "ended") {
-        router.push("/team/results");
-        return;
-      }
-      if (data.status === "waiting") {
-        router.push("/team/waiting");
-        return;
-      }
-      if (data.status === "auctioning") {
-        router.push("/team/auction");
-        return;
-      }
-      // 'loading': puzzles not ready yet (late-join race condition) — stay and retry
-      if (data.status === "loading") {
-        return;
-      }
-      // Only set state when we have full game data
-      if (data.status === "playing" && data.puzzle) {
-        setState(data);
-      }
+      if (data.status === "success") { router.push("/team/success"); return; }
+      if (data.status === "caught") { router.push("/team/caught"); return; }
+      if (data.status === "ended") { router.push("/team/results"); return; }
+      if (data.status === "waiting") { router.push("/team/waiting"); return; }
+      if (data.status === "auctioning") { router.push("/team/auction"); return; }
+      if (data.status === "loading") return;
+      if (data.status === "playing" && data.puzzle) setState(data);
     }
   }, [data, error, router]);
 
-  // Auto-redirect when session ends or puzzle is missing
   useEffect(() => {
     if (state && !state.puzzle) {
-      const timer = setTimeout(() => {
-        router.push("/team/results");
-      }, 2000);
+      const timer = setTimeout(() => router.push("/team/results"), 2000);
       return () => clearTimeout(timer);
     }
   }, [state, router]);
 
-  // Client-side count up between polls
   useEffect(() => {
     if (!state) return;
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
-      setState((prev) => {
-        if (!prev) return prev;
-        return { ...prev, timeSinceStart: (prev.timeSinceStart || 0) + 1 };
-      });
+      setState((prev) =>
+        prev ? { ...prev, timeSinceStart: (prev.timeSinceStart || 0) + 1 } : prev
+      );
     }, 1000);
     return () => clearInterval(timerRef.current);
-  }, [state, router]);
+  }, [state]);
 
-  async function handleSubmit(answer) {
-    if (!state || submitting) return;
+  useEffect(() => {
+    setAnswer("");
+    setMessage("");
+  }, [state?.puzzle?.puzzleId]);
+
+  async function handleSubmit(e) {
+    e?.preventDefault();
+    if (!state || submitting || !answer.trim()) return;
     setSubmitting(true);
     setMessage("");
     try {
       const res = await fetch("/api/team/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ puzzleId: state.puzzle.puzzleId, answer }),
+        body: JSON.stringify({ puzzleId: state.puzzle.puzzleId, answer: answer.trim() }),
       });
       const resData = await res.json();
       setMessage(resData.message || "");
-      if (resData.allSolved) {
-        router.push("/team/success");
-        return;
-      }
-      mutate(); // refresh state after submit
-
+      if (resData.allSolved) { router.push("/team/success"); return; }
+      mutate();
     } catch {
       setMessage("Network error. Try again.");
     } finally {
@@ -124,14 +95,10 @@ export default function GamePage() {
         body: JSON.stringify({ direction }),
       });
       mutate();
-    } catch {
-      /* ignore */
-    } finally {
-      setNavigating(false);
-    }
+    } catch { /* ignore */ }
+    finally { setNavigating(false); }
   }
 
-  // ⚠️  DEBUG ONLY — remove before going live
   const [debugSolving, setDebugSolving] = useState(false);
   async function debugSolveAndNext() {
     if (debugSolving) return;
@@ -139,254 +106,332 @@ export default function GamePage() {
     setMessage("");
     try {
       const res = await fetch("/api/team/debug-solve", { method: "POST" });
-      const data = await res.json();
-      if (data.allSolved) {
-        router.push("/team/success");
-        return;
-      }
-      setMessage(data.message || "");
+      const d = await res.json();
+      if (d.allSolved) { router.push("/team/success"); return; }
+      setMessage(d.message || "");
       mutate();
-    } catch {
-      setMessage("Debug solve failed.");
-    } finally {
-      setDebugSolving(false);
-    }
+    } catch { setMessage("Debug solve failed."); }
+    finally { setDebugSolving(false); }
   }
-
-
-
 
   if (!state) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="text-terminal-green animate-pulse text-xl">
-          LOADING MISSION DATA...
-        </div>
-      </main>
+      <div style={styles.loadingWrap}>
+        <div style={styles.loadingText}>LOADING MISSION DATA...</div>
+      </div>
     );
   }
 
+  const puzzle = state.puzzle;
+  const enemyName = puzzle?.title || "???";
+  const enemyLevel = puzzle ? `${state.currentIndex + 1}` : "?";
+  const playerName = state.teamName || "TEAM";
+  const promptText = puzzle?.prompt || "";
+
   return (
-    <main className="min-h-screen p-4 max-w-4xl mx-auto">
-      {/* Live Auction Alert */}
+    <div style={styles.page}>
       {state.hasActiveAuction && (
-        <div className="mb-4 p-3 bg-amber-950/40 border border-terminal-amber rounded flex items-center justify-between gap-3 animate-pulse shadow-[0_0_15px_rgba(255,176,0,0.2)]">
-          <div className="flex items-center gap-2 text-terminal-amber text-xs font-bold uppercase tracking-wider">
-            <span className="text-xl">⚡</span>
-            <div>
-              <div className="glow-text">ALERT: LIVE AUCTION IN PROGRESS</div>
-              <div className="text-[10px] text-terminal-muted lowercase">
-                {state.hasBidInActiveAuction ? "Your secret bid is secured" : "New asset available. Bids needed."}
-              </div>
-            </div>
-          </div>
-          <button 
-            onClick={() => router.push("/team/auction")}
-            className="btn-amber text-[10px] px-3 py-1.5 font-black"
-          >
+        <div style={styles.auctionBanner}>
+          <span>⚡ LIVE AUCTION IN PROGRESS</span>
+          <button onClick={() => router.push("/team/auction")} style={styles.auctionBtn}>
             {state.hasBidInActiveAuction ? "VIEW BIDS →" : "BID NOW →"}
           </button>
         </div>
       )}
 
-      {/* Top HUD */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <div className="terminal-card text-center">
-          <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">
-            Time Elapsed
-          </div>
-          <div
-            className={`text-xl md:text-2xl font-bold text-terminal-green`}
-          >
-            {formatTime(state.timeSinceStart)}
-          </div>
-        </div>
-        <div className="terminal-card text-center">
-          <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">
-            Puzzle
-          </div>
-          <div className="text-terminal-green text-xl font-bold">
-            {state.currentIndex + 1} / {state.totalPuzzles}
-          </div>
-        </div>
-        <div className="terminal-card text-center">
-          <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">
-            Solved
-          </div>
-          <div className="text-terminal-green text-xl font-bold">
-            {state.solvedCount} / {state.totalPuzzles}
-          </div>
-        </div>
-        <div className="terminal-card text-center border-amber-500/30">
-          <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">
-            Total Score
-          </div>
-          <div className="text-terminal-amber text-xl font-bold">
-            {state.score || 0} <span className="text-[10px]">PTS</span>
-          </div>
-        </div>
-      </div>
+      <div style={styles.battleWrap}>
+        <div style={styles.battleContainer}>
+          <img
+            src="/images/bug_bg.png"
+            alt="Battle Background"
+            style={styles.bgImg}
+            draggable={false}
+          />
 
-      {/* Powercards & Credits */}
-      {(state.currency > 0 || (state.ownedPowercards && state.ownedPowercards.length > 0)) && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-          <div className="terminal-card md:col-span-1 border-terminal-amber/20 bg-amber-950/5 flex flex-col justify-center items-center py-2">
-             <div className="text-terminal-muted text-[10px] uppercase tracking-tighter mb-1">Available Credits</div>
-             <div className="text-terminal-amber font-mono font-bold text-lg">{state.currency || 0} ₵</div>
+          {/* ── Zone A: Enemy Name (top-left beige box) ── */}
+          <div style={{ ...styles.zone, top: "13.5%", left: "8%", textAlign: "left" }}>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(10px, 1.8vw, 20px)", color: "#2c2c2c", letterSpacing: "1px" }}>
+              {enemyName}
+            </span>
           </div>
-          <div className="terminal-card md:col-span-2 border-terminal-green/20">
-             <div className="text-terminal-muted text-[10px] uppercase tracking-tighter mb-2">Power Inventory</div>
-             <div className="flex flex-wrap gap-3">
-                {state.ownedPowercards && state.ownedPowercards.length > 0 ? (
-                  state.ownedPowercards.map((pc, i) => (
-                    <div key={i} className="group relative flex flex-col items-center gap-1 bg-amber-950/15 border border-terminal-amber/20 rounded p-2 w-28">
-                      {pc.image && (
-                        <img
-                          src={pc.image}
-                          alt={pc.name}
-                          className="w-16 h-16 object-contain rounded"
-                        />
-                      )}
-                      <div className="text-terminal-amber text-[10px] font-bold text-center leading-tight">{pc.name}</div>
-                      {/* Tooltip */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-black border border-terminal-border rounded text-[10px] text-terminal-text opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-xl">
-                        <div className="text-terminal-amber font-bold mb-1">{pc.name}</div>
-                        <div className="text-terminal-muted mb-1 italic text-[9px]">{pc.timing}</div>
-                        {pc.description}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-terminal-muted text-[10px] italic">No active powercards</div>
-                )}
-             </div>
+
+          {/* ── Zone B: Enemy Level (top-left box, after "Lv") ── */}
+          <div style={{ ...styles.zone, top: "13.5%", left: "38%", textAlign: "left" }}>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(10px, 1.8vw, 20px)", color: "#2c2c2c", letterSpacing: "2px" }}>
+              {enemyLevel}
+            </span>
           </div>
-        </div>
-      )}
 
-      {/* Puzzle Card */}
-      <div className="terminal-card mb-4">
-        {!state.puzzle ? (
-          <div className="text-terminal-red text-sm text-center py-4">
-            ⚠ Session ended. Redirecting...
+          {/* ── Zone C: Team name (bottom-right player box, above HP bar) ── */}
+          <div style={{ ...styles.zone, top: "47%", left: "61%", textAlign: "left" }}>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(10px, 1.8vw, 20px)", color: "#2c2c2c", letterSpacing: "1px", textTransform: "uppercase" }}>
+              {playerName}
+            </span>
           </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-terminal-muted text-xs uppercase tracking-wider">
-                ID:{" "}
-                <span className="text-terminal-green">{state.puzzle.puzzleId}</span>
-              </div>
-              {state.isSolved && (
-                <span className="text-terminal-green text-xs border border-terminal-green px-2 py-0.5 rounded">
-                  ✓ SOLVED
-                </span>
-              )}
-            </div>
-            <div className="flex items-center justify-between mb-4">
-               <h2 className="text-terminal-green text-xl font-bold">
-                 {state.puzzle.title}
-               </h2>
-               <div className="text-[10px] font-bold px-2 py-0.5 bg-green-500/10 text-green-500 border border-green-500/20 rounded uppercase tracking-tighter">
-                  Reward: {state.puzzle.points} PTS
-               </div>
-            </div>
-            <p className="text-terminal-text text-sm mb-6 whitespace-pre-wrap leading-relaxed">
-              {state.puzzle.prompt}
-            </p>
 
-            {state.puzzle.uiConfig?.downloadUrl && (
-              <div className="mb-6">
-                <a
-                  href={state.puzzle.uiConfig.downloadUrl}
-                  download
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-terminal-green/10 border border-terminal-green text-terminal-green rounded hover:bg-terminal-green/20 transition-colors text-sm font-bold uppercase tracking-wider"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                    ></path>
-                  </svg>
-                  Download Source Code (.zip)
-                </a>
-              </div>
-            )}
+          {/* ── Zone D: Prompt text (bottom-left blue box) ── */}
+          <div style={{ ...styles.zone, top: "71%", left: "4.5%", width: "52%", height: "12%", overflow: "hidden", textAlign: "left" }}>
+            <span style={{ ...styles.pixelText, fontSize: "clamp(9px, 1.4vw, 15px)", color: "#ffffff", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+              {promptText}
+            </span>
+          </div>
 
-            {/* Puzzle Renderer */}
-            {!state.isSolved ? (
-              <PuzzleRenderer
-                key={state.puzzle.puzzleId}
-                puzzle={state.puzzle}
-                onSubmit={handleSubmit}
-                submitting={submitting}
+          {/* ── Answer input (Now positioned in the white/beige box with dark text) ── */}
+          {!state.isSolved && (
+            <form
+              onSubmit={handleSubmit}
+              style={{ ...styles.zone, top: "85%", left: "5%", width: "51%", height: "8%", display: "flex", alignItems: "center", gap: "6px" }}
+            >
+              <span style={{ ...styles.pixelText, color: "#2c2c2c", fontSize: "clamp(9px, 1.5vw, 16px)", marginLeft: "8px" }}>▶</span>
+              <input
+                type="text"
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSubmit(e)}
+                placeholder="type answer..."
+                autoComplete="off"
+                style={styles.answerInput}
               />
-            ) : (
-              <div className="border border-terminal-green/30 rounded p-4 text-center text-terminal-green text-sm">
-                ✓ You have already solved this puzzle. Navigate to the next one.
-              </div>
-            )}
-          </>
-        )}
+            </form>
+          )}
 
-        {/* Message */}
-        {message && (
-          <div
-            className={`mt-4 px-4 py-3 rounded border text-sm ${message.toLowerCase().includes("correct") ||
-              message.toLowerCase().includes("solved")
-              ? "border-terminal-green text-terminal-green bg-green-950/20"
-              : "border-terminal-red text-terminal-red bg-red-950/20"
-              }`}
-          >
-            {message}
-          </div>
-        )}
-      </div>
+          {state.isSolved && (
+            <div style={{ ...styles.zone, top: "85%", left: "5%", height: "8%", display: "flex", alignItems: "center" }}>
+              <span style={{ ...styles.pixelText, color: "#1e824c", fontSize: "clamp(9px, 1.5vw, 16px)", letterSpacing: "1px", marginLeft: "8px" }}>
+                ✓ SOLVED — navigate to next
+              </span>
+            </div>
+          )}
 
-      {/* ⚠️  DEBUG BLOCK — remove before going live */}
-      <div className="mb-4 border border-yellow-500/60 rounded p-3 bg-yellow-950/20 flex items-center justify-between gap-3 flex-wrap">
-        <div className="text-yellow-400 text-xs font-mono">⚠ DEBUG MODE</div>
-        <div className="flex gap-2 flex-wrap">
+          {/* Message Feedback */}
+          {message && (
+            <div style={{ ...styles.zone, top: "94%", left: "5%", width: "51%", textAlign: "center" }}>
+              <span style={{
+                ...styles.pixelText,
+                fontSize: "clamp(8px, 1.2vw, 13px)",
+                color: message.toLowerCase().includes("correct") || message.toLowerCase().includes("solved")
+                  ? "#55ff55" : "#ffbbbb",
+              }}>
+                {message}
+              </span>
+            </div>
+          )}
+
+          {/* ── Four-button grid ── */}
+
+          {/* Top-left: DOWNLOAD */}
+          {puzzle?.uiConfig?.downloadUrl ? (
+            <a
+              href={puzzle.uiConfig.downloadUrl}
+              download
+              style={{ ...styles.navBtn, top: "69%", left: "62.5%" }}
+            >
+              <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 14px)", color: "#2c2c2c", fontWeight: "bold" }}>DOWNLOAD</span>
+              <span style={{ ...styles.pixelText, fontSize: "clamp(6px, 0.9vw, 10px)", color: "#555", marginTop: "2px" }}>(SOURCE)</span>
+            </a>
+          ) : (
+            <div style={{ ...styles.navBtn, top: "69%", left: "60.5%", opacity: 0.4 }}>
+              <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 14px)", color: "#2c2c2c", fontWeight: "bold" }}>DOWNLOAD</span>
+            </div>
+          )}
+
+          {/* Top-right: SUBMIT */}
           <button
-            onClick={debugSolveAndNext}
-            disabled={debugSolving}
-            className="px-4 py-2 text-xs font-bold tracking-widest rounded border border-yellow-500 text-yellow-300 bg-yellow-900/30 hover:bg-yellow-800/40 transition-colors disabled:opacity-40"
+            onClick={handleSubmit}
+            disabled={!answer.trim() || submitting || state.isSolved}
+            style={{ ...styles.navBtn, top: "69%", left: "80.5%", opacity: (!answer.trim() || submitting || state.isSolved) ? 0.4 : 1 }}
           >
-            {debugSolving ? "⏳ SOLVING..." : "⚡ NEXT + SOLVE"}
+            <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 14px)", color: "#2c2c2c", fontWeight: "bold" }}>
+              {submitting ? "..." : "SUBMIT"}
+            </span>
+          </button>
+
+          {/* Bottom-left: PREV */}
+          <button
+            onClick={() => navigate("prev")}
+            disabled={state.currentIndex === 0 || navigating}
+            style={{ ...styles.navBtn, top: "80%", left: "60.5%", opacity: (state.currentIndex === 0 || navigating) ? 0.4 : 1 }}
+          >
+            <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 14px)", color: "#2c2c2c", fontWeight: "bold" }}>PREV</span>
+          </button>
+
+          {/* Bottom-right: NEXT */}
+          <button
+            onClick={() => navigate("next")}
+            disabled={state.currentIndex === state.totalPuzzles - 1 || navigating}
+            style={{ ...styles.navBtn, top: "80%", left: "79.5%", opacity: (state.currentIndex === state.totalPuzzles - 1 || navigating) ? 0.4 : 1 }}
+          >
+            <span style={{ ...styles.pixelText, fontSize: "clamp(8px, 1.3vw, 14px)", color: "#2c2c2c", fontWeight: "bold" }}>NEXT</span>
           </button>
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex justify-between items-center gap-4">
-        <button
-          onClick={() => navigate("prev")}
-          disabled={state.currentIndex === 0 || navigating}
-          className="btn-primary disabled:opacity-30"
-        >
-          ← PREV
-        </button>
-        <span className="text-terminal-muted text-xs">
-          {state.currentIndex + 1} of {state.totalPuzzles}
-        </span>
-        <button
-          onClick={() => navigate("next")}
-          disabled={state.currentIndex === state.totalPuzzles - 1 || navigating}
-          className="btn-primary disabled:opacity-30"
-        >
-          NEXT →
-        </button>
+      <div style={styles.infoStrip}>
+        <span style={styles.infoItem}>🧩 {state.currentIndex + 1} / {state.totalPuzzles}</span>
+        <span style={styles.infoItem}>✔ Solved: {state.solvedCount}</span>
+        <span style={styles.infoItem}>⭐ Score: {state.score || 0} pts</span>
+        <span style={styles.infoItem}>Reward: {puzzle?.points || "-"} pts</span>
       </div>
 
-
-    </main>
+      <div style={styles.debugBlock}>
+        <span style={{ color: "#facc15", fontSize: 11, fontFamily: "monospace" }}>⚠ DEBUG MODE</span>
+        <button onClick={debugSolveAndNext} disabled={debugSolving} style={styles.debugBtn}>
+          {debugSolving ? "⏳ SOLVING..." : "⚡ NEXT + SOLVE"}
+        </button>
+      </div>
+    </div>
   );
 }
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
+const PIXEL_FONT = "'PokéPixel', 'Courier New', monospace";
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    background: "#0a0a0a",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "stretch",
+    padding: 0,
+    gap: 0,
+  },
+  loadingWrap: {
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#0a0a0a",
+  },
+  loadingText: {
+    fontFamily: PIXEL_FONT,
+    color: "#00ff41",
+    fontSize: 20,
+    animation: "pulse 1.5s ease-in-out infinite",
+    letterSpacing: 2,
+  },
+  auctionBanner: {
+    width: "100%",
+    background: "rgba(120,80,0,0.5)",
+    border: "1px solid #ffb000",
+    padding: "4px 12px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    color: "#ffb000",
+    fontFamily: PIXEL_FONT,
+    fontSize: 11,
+    letterSpacing: 1,
+    flexShrink: 0,
+  },
+  auctionBtn: {
+    background: "transparent",
+    border: "1px solid #ffb000",
+    color: "#ffb000",
+    padding: "3px 10px",
+    borderRadius: 4,
+    cursor: "pointer",
+    fontFamily: PIXEL_FONT,
+    fontSize: 10,
+    letterSpacing: 1,
+  },
+  battleWrap: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    background: "#0a0a0a",
+    overflow: "hidden",
+  },
+  battleContainer: {
+    position: "relative",
+    height: "100vh",
+    width: "auto",
+    aspectRatio: "1320 / 990",
+    userSelect: "none",
+    flexShrink: 0,
+  },
+  bgImg: {
+    display: "block",
+    width: "100%",
+    height: "100%",
+    objectFit: "fill",
+    imageRendering: "pixelated",
+  },
+  zone: {
+    position: "absolute",
+    pointerEvents: "none",
+  },
+  pixelText: {
+    fontFamily: PIXEL_FONT,
+    display: "inline-block",
+    imageRendering: "pixelated",
+  },
+  answerInput: {
+    background: "transparent",
+    border: "none", // Removed the white underline
+    outline: "none",
+    color: "#2c2c2c", // Changed text color to dark gray/black
+    fontFamily: PIXEL_FONT,
+    fontSize: "clamp(9px, 1.5vw, 16px)",
+    width: "100%",
+    letterSpacing: "1px",
+    caretColor: "#2c2c2c",
+    pointerEvents: "auto",
+  },
+  navBtn: {
+    position: "absolute",
+    background: "transparent",
+    border: "none",
+    width: "16.5%",     // Fine-tuned to perfectly match the box width
+    height: "11.5%",    // Fine-tuned to perfectly match the box height
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    transition: "opacity 0.2s ease-in-out",
+    textDecoration: "none",
+    pointerEvents: "auto",
+  },
+  infoStrip: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-around",
+    flexWrap: "wrap",
+    gap: 4,
+    background: "#111",
+    borderTop: "1px solid #1e3a1e",
+    padding: "5px 12px",
+    flexShrink: 0,
+  },
+  infoItem: {
+    fontFamily: PIXEL_FONT,
+    fontSize: 11,
+    color: "#c0ffc0",
+    letterSpacing: 1,
+  },
+  debugBlock: {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    background: "rgba(60,50,0,0.4)",
+    borderTop: "1px solid rgba(250,204,21,0.5)",
+    padding: "5px 12px",
+    flexShrink: 0,
+  },
+  debugBtn: {
+    background: "transparent",
+    border: "1px solid #ca8a04",
+    color: "#fde047",
+    padding: "4px 12px",
+    borderRadius: 4,
+    cursor: "pointer",
+    fontFamily: "monospace",
+    fontSize: 11,
+    letterSpacing: 1,
+  },
+};
