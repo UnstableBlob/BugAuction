@@ -1,0 +1,34 @@
+[
+  {
+    "id": "PC-TAKEOVER",
+    "name": "Hostile Takeover",
+    "description": "Steal one unsolved bug from another team. Can be used at the start of or during the solving phase.",
+    "cost": 150,
+    "image": "/powercards/Takeover.png",
+    "timing": "Start or during solving phase"
+  },
+  {
+    "id": "PC-FREEZE",
+    "name": "System Freeze",
+    "description": "Target team cannot submit answers for 3 minutes.",
+    "cost": 120,
+    "image": "/powercards/Freeze.png",
+    "timing": "Anytime during solving phase"
+  },
+  {
+    "id": "PC-FIREWALL",
+    "name": "Firewall",
+    "description": "Gives your team protection for 10 minutes from Freeze or Steal attacks.",
+    "cost": 100,
+    "image": "/powercards/Firewall.png",
+    "timing": "During solving phase"
+  },
+  {
+    "id": "PC-CLEANSE",
+    "name": "Cleanse",
+    "description": "Cancels the effect of a Freeze or Steal. The attack becomes null and void.",
+    "cost": 80,
+    "image": "/powercards/Cleanse.png",
+    "timing": "After an attack happens"
+  }
+]

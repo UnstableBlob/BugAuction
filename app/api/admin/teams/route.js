@@ -40,7 +40,7 @@ export async function GET(req) {
     // Return all teams that have logged in (not inactive)
     const teams = await Team.find(
       { status: { $ne: "inactive" } },
-      "teamName status activeSessionId solvedPuzzleIds assignedPuzzleIds waitingRoomEnteredAt",
+      "teamName status activeSessionId solvedPuzzleIds assignedPuzzleIds assignedPowercardIds currency tid waitingRoomEnteredAt",
     ).lean();
     return NextResponse.json({ teams });
   } catch (err) {

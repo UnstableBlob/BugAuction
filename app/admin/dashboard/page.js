@@ -34,9 +34,11 @@ export default function AdminDashboard() {
   const { data: lbData, mutate: mutateLb } = useSWR("/api/admin/leaderboard", fetcher, { refreshInterval: 5000 });
   const { data: auctionData, mutate: mutateAuction } = useSWR("/api/admin/auction/current", fetcher, { refreshInterval: 5000 });
   const { data: puzzlesData } = useSWR("/api/admin/puzzles", fetcher);
+  const { data: powercardsData } = useSWR("/api/admin/powercards/list", fetcher);
 
   const teams = teamsData?.teams || [];
   const allPuzzles = puzzlesData?.puzzles || [];
+  const allPowercards = powercardsData?.powercards || [];
   const activeAuction = auctionData?.auction || null;
   const session = lbData?.session || null;
 
@@ -50,6 +52,7 @@ export default function AdminDashboard() {
   const [sessionTimer, setSessionTimer] = useState(null);
 
   const [auctionPuzzleId, setAuctionPuzzleId] = useState("");
+  const [auctionItemType, setAuctionItemType] = useState("puzzle");
 
   const refreshAll = () => {
     mutateTeams();
@@ -172,7 +175,7 @@ export default function AdminDashboard() {
        return;
     }
     if (!auctionPuzzleId) {
-      setMsg("Error: Select a puzzle to auction.");
+      setMsg(`Error: Select a ${auctionItemType} to auction.`);
       return;
     }
     setLoading(true);
@@ -184,6 +187,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           sessionId: session._id,
           puzzleId: auctionPuzzleId,
+          itemType: auctionItemType,
         }),
       });
       const data = await res.json();
@@ -274,13 +278,19 @@ export default function AdminDashboard() {
                 onClick={() => router.push("/admin/assignments")}
                 className="btn-amber text-xs px-3 py-1"
               >
-                🧩 Puzzle Assignments
+                🧩 Puzzles
+              </button>
+              <button
+                onClick={() => router.push("/admin/powercards")}
+                className="btn-amber text-xs px-3 py-1"
+              >
+                ⚡ Powercards
               </button>
               <button
                 onClick={() => router.push("/admin/leaderboard")}
                 className="btn-amber text-xs px-3 py-1"
               >
-                📊 View Leaderboard
+                📊 Leaderboard
               </button>
             </>
           )}
@@ -317,38 +327,63 @@ export default function AdminDashboard() {
           <div className="terminal-card space-y-3 border-amber-500/50">
             <div className="terminal-header text-amber-500">Auction Management</div>
             <div className="text-terminal-muted text-xs mb-2">
-               Manage silent auctions for puzzles. Requires an active session.
+               Manage silent auctions for puzzles or powercards.
             </div>
             {!activeAuction ? (
               <>
-                 <label className="text-terminal-muted text-xs block mb-1">Select Puzzle</label>
+                 <div className="flex gap-2 mb-2">
+                   <button 
+                     onClick={() => { setAuctionItemType("puzzle"); setAuctionPuzzleId(""); }}
+                     className={`flex-1 text-[10px] py-1 border ${auctionItemType === 'puzzle' ? 'border-terminal-amber text-terminal-amber bg-amber-950/20' : 'border-terminal-border text-terminal-muted'}`}
+                   >
+                     PUZZLES
+                   </button>
+                   <button 
+                     onClick={() => { setAuctionItemType("powercard"); setAuctionPuzzleId(""); }}
+                     className={`flex-1 text-[10px] py-1 border ${auctionItemType === 'powercard' ? 'border-terminal-amber text-terminal-amber bg-amber-950/20' : 'border-terminal-border text-terminal-muted'}`}
+                   >
+                     POWER CARDS
+                   </button>
+                 </div>
+                 <label className="text-terminal-muted text-xs block mb-1">Select {auctionItemType === 'puzzle' ? 'Puzzle' : 'Power Card'}</label>
                  <select 
                     value={auctionPuzzleId} 
                     onChange={(e) => setAuctionPuzzleId(e.target.value)}
                     className="terminal-input w-full bg-black mb-2"
                  >
-                    <option value="">-- Choose Priority Puzzle --</option>
-                    {allPuzzles
-                      .filter(p => !teams.some(t => t.assignedPuzzleIds?.includes(p.puzzleId)))
-                      .map(p => (
-                       <option key={p.puzzleId} value={p.puzzleId}>
-                          {p.title} ({p.puzzleId})
-                       </option>
-                    ))}
+                    <option value="">-- Choose {auctionItemType === 'puzzle' ? 'Puzzle' : 'Power Card'} --</option>
+                    {auctionItemType === "puzzle" ? (
+                      allPuzzles
+                        .filter(p => !teams.some(t => t.assignedPuzzleIds?.includes(p.puzzleId)))
+                        .map(p => (
+                         <option key={p.puzzleId} value={p.puzzleId}>
+                            {p.title} ({p.puzzleId})
+                         </option>
+                      ))
+                    ) : (
+                      allPowercards.map(pc => (
+                        <option key={pc.id} value={pc.id}>
+                          {pc.name} ({pc.id})
+                        </option>
+                      ))
+                    )}
                  </select>
                  <button 
                     onClick={startAuction} 
                     disabled={loading || !session || session.status !== 'started'} 
                     className="btn-amber w-full disabled:opacity-30"
                  >
-                    {loading ? "PROCESSING..." : "BIDDING: OPEN AUCTION"}
+                    {loading ? "PROCESSING..." : `BIDDING: OPEN ${auctionItemType.toUpperCase()} AUCTION`}
                  </button>
               </>
             ) : (
                <>
                  <div className="p-2 border border-terminal-green/30 bg-green-950/20 mb-2 rounded">
+                    <div className="text-terminal-muted text-[10px] uppercase mb-1">Active {activeAuction.itemType || 'puzzle'} Auction</div>
                     <div className="text-terminal-amber font-bold text-sm mb-1">
-                       Active: {allPuzzles.find(p => p.puzzleId === activeAuction.puzzleId)?.title || activeAuction.puzzleId}
+                       {activeAuction.itemType === 'powercard' 
+                         ? allPowercards.find(pc => pc.id === activeAuction.puzzleId)?.name || activeAuction.puzzleId
+                         : allPuzzles.find(p => p.puzzleId === activeAuction.puzzleId)?.title || activeAuction.puzzleId}
                     </div>
                     <div className="text-terminal-muted text-xs mb-1">
                        Bids received: {activeAuction.bids?.length || 0}
@@ -439,7 +474,9 @@ export default function AdminDashboard() {
                       Team Name
                     </th>
                     <th className="text-left px-2 py-2 font-normal">Status</th>
+                    <th className="text-left px-2 py-2 font-normal">Credits</th>
                     <th className="text-left px-2 py-2 font-normal">Solved</th>
+                    <th className="text-left px-2 py-2 font-normal">Cards</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -460,9 +497,15 @@ export default function AdminDashboard() {
                           {t.status}
                         </span>
                       </td>
+                      <td className="px-2 py-2 text-terminal-amber font-mono">
+                        {t.currency || 0}
+                      </td>
                       <td className="px-2 py-2 text-terminal-text">
                         {t.solvedPuzzleIds?.length || 0} /{" "}
                         {t.assignedPuzzleIds?.length || "—"}
+                      </td>
+                      <td className="px-2 py-2 text-terminal-amber font-bold">
+                        {t.assignedPowercardIds?.length || 0}
                       </td>
                     </tr>
                   ))}

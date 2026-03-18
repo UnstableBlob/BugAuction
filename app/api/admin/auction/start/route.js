@@ -4,10 +4,11 @@ import Auction from "@/models/Auction";
 import Session from "@/models/Session";
 import Team from "@/models/Team";
 import { getPuzzleById } from "@/lib/puzzles";
+import { getPowercardById } from "@/lib/powercards";
 
 export async function POST(req) {
   try {
-    const { sessionId, puzzleId } = await req.json();
+    const { sessionId, puzzleId, itemType = "puzzle" } = await req.json();
 
     if (!sessionId || !puzzleId) {
       return NextResponse.json(
@@ -24,19 +25,22 @@ export async function POST(req) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
-    // Check if puzzle exists
-    const puzzle = getPuzzleById(puzzleId);
-    if (!puzzle) {
-      return NextResponse.json({ error: "Puzzle not found" }, { status: 404 });
+    // Check if item exists
+    const item = itemType === "powercard" ? getPowercardById(puzzleId) : getPuzzleById(puzzleId);
+    if (!item) {
+      return NextResponse.json({ error: `${itemType} not found` }, { status: 404 });
     }
 
-    // Check if the puzzle is already assigned to a team
-    const assignedTeam = await Team.findOne({ assignedPuzzleIds: puzzleId });
-    if (assignedTeam) {
-      return NextResponse.json(
-        { error: `Puzzle is already assigned to team: ${assignedTeam.teamName}` },
-        { status: 400 }
-      );
+    // For puzzles, check if already assigned. For powercards, maybe multiple can be owned?
+    // User didn't specify, but usually puzzles are unique. Powercards might be too.
+    if (itemType === "puzzle") {
+      const assignedTeam = await Team.findOne({ assignedPuzzleIds: puzzleId });
+      if (assignedTeam) {
+        return NextResponse.json(
+          { error: `Puzzle is already assigned to team: ${assignedTeam.teamName}` },
+          { status: 400 }
+        );
+      }
     }
 
     // Check if there is already an open auction for this session
@@ -55,6 +59,7 @@ export async function POST(req) {
     const auction = new Auction({
       sessionId,
       puzzleId,
+      itemType,
       status: "open",
       bids: [],
     });

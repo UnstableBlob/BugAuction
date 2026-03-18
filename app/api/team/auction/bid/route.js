@@ -25,9 +25,9 @@ export async function POST(req) {
     await connectDB();
 
     const team = await Team.findById(teamCookie._id);
-    if (!team || team.status !== "auctioning") {
+    if (!team || !["auctioning", "playing"].includes(team.status)) {
       return NextResponse.json(
-        { error: "Team is not in auctioning state" },
+        { error: `Team is not in correct state for bidding (${team?.status})` },
         { status: 403 }
       );
     }

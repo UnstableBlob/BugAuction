@@ -59,22 +59,30 @@ export async function POST(req) {
       if (winner) {
         // Deduct currency
         winner.currency -= winningBidAmount;
-        // Assign puzzle
-        if (!winner.assignedPuzzleIds.includes(auction.puzzleId)) {
-          winner.assignedPuzzleIds.push(auction.puzzleId);
-        }
-        await winner.save();
+        
+        // Assign item based on type
+        if (auction.itemType === "powercard") {
+          if (!winner.assignedPowercardIds.includes(auction.puzzleId)) {
+            winner.assignedPowercardIds.push(auction.puzzleId);
+          }
+        } else {
+          // Default to puzzle
+          if (!winner.assignedPuzzleIds.includes(auction.puzzleId)) {
+            winner.assignedPuzzleIds.push(auction.puzzleId);
+          }
 
-        // Also update session assignments mapping
-        const session = await Session.findById(auction.sessionId);
-        if (session) {
-          const teamAssignments = session.assignments.get(winner.teamName) || [];
-          if (!teamAssignments.includes(auction.puzzleId)) {
-            teamAssignments.push(auction.puzzleId);
-            session.assignments.set(winner.teamName, teamAssignments);
-            await session.save();
+          // Also update session assignments mapping for puzzles
+          const session = await Session.findById(auction.sessionId);
+          if (session) {
+            const teamAssignments = session.assignments.get(winner.teamName) || [];
+            if (!teamAssignments.includes(auction.puzzleId)) {
+              teamAssignments.push(auction.puzzleId);
+              session.assignments.set(winner.teamName, teamAssignments);
+              await session.save();
+            }
           }
         }
+        await winner.save();
       }
     }
 

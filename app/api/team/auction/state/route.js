@@ -3,9 +3,10 @@ import { getTeamFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Auction from "@/models/Auction";
 import Session from "@/models/Session";
-import Puzzle from "@/models/Puzzle";
 import Team from "@/models/Team";
 import { getCache, setCache } from "@/lib/cache";
+import { getPuzzleById } from "@/lib/puzzles";
+import { getPowercardById } from "@/lib/powercards";
 
 export async function GET(req) {
   try {
@@ -64,20 +65,33 @@ export async function GET(req) {
     let auctionInfo = null;
 
     if (currentAuction) {
-        let puzzleDetails = null;
+        let itemDetails = null;
         if(currentAuction.status === "open") {
-           let p = getCache(`puzzle_${currentAuction.puzzleId}`);
-           if (!p) {
-               p = await Puzzle.findOne({ puzzleId: currentAuction.puzzleId}).lean();
-               if(p) setCache(`puzzle_${currentAuction.puzzleId}`, p, 3600);
-           }
-           if(p) {
-             puzzleDetails = {
-                 puzzleId: p.puzzleId,
-                 title: p.title,
-                 prompt: p.prompt,
-                 points: p.points,
-             }
+           if (currentAuction.itemType === "powercard") {
+               const pc = getPowercardById(currentAuction.puzzleId);
+               if (pc) {
+                 itemDetails = {
+                   id: pc.id,
+                   title: pc.name,
+                   prompt: pc.description,
+                   points: pc.cost || 0,
+                   image: pc.image || null,
+                   timing: pc.timing || null,
+                   type: "powercard"
+                 };
+               }
+           } else {
+               // Puzzle
+               const p = getPuzzleById(currentAuction.puzzleId);
+               if(p) {
+                 itemDetails = {
+                     puzzleId: p.puzzleId,
+                     title: p.title,
+                     prompt: p.prompt,
+                     points: p.points,
+                     type: "puzzle"
+                 }
+               }
            }
         }
 
@@ -88,7 +102,8 @@ export async function GET(req) {
       auctionInfo = {
         auctionId: currentAuction._id,
         puzzleId: currentAuction.puzzleId,
-        puzzle: puzzleDetails,
+        itemType: currentAuction.itemType || "puzzle",
+        puzzle: itemDetails, // keeping the key 'puzzle' for frontend compatibility but can contain powercard
         status: currentAuction.status,
         hasBid: teamBidIndex > -1,
         myBid: teamBidIndex > -1 ? currentAuction.bids[teamBidIndex].amount : null,
@@ -97,9 +112,13 @@ export async function GET(req) {
       };
     }
 
+    // Resolve powercards
+    const ownedPowercards = (team.assignedPowercardIds || []).map(id => getPowercardById(id)).filter(Boolean);
+
     return NextResponse.json({
       status: team.status,
       currency: team.currency,
+      ownedPowercards,
       auction: auctionInfo,
     });
   } catch (err) {

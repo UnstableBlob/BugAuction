@@ -8,8 +8,13 @@ const AuctionSchema = new mongoose.Schema(
       required: true,
     },
     puzzleId: {
-      type: String, // String ID matching Puzzle model
+      type: String, // String ID matching Puzzle or Powercard model
       required: true,
+    },
+    itemType: {
+      type: String,
+      enum: ["puzzle", "powercard"],
+      default: "puzzle",
     },
     status: {
       type: String,

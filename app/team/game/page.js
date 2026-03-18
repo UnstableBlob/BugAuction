@@ -168,6 +168,27 @@ export default function GamePage() {
 
   return (
     <main className="min-h-screen p-4 max-w-4xl mx-auto">
+      {/* Live Auction Alert */}
+      {state.hasActiveAuction && (
+        <div className="mb-4 p-3 bg-amber-950/40 border border-terminal-amber rounded flex items-center justify-between gap-3 animate-pulse shadow-[0_0_15px_rgba(255,176,0,0.2)]">
+          <div className="flex items-center gap-2 text-terminal-amber text-xs font-bold uppercase tracking-wider">
+            <span className="text-xl">⚡</span>
+            <div>
+              <div className="glow-text">ALERT: LIVE AUCTION IN PROGRESS</div>
+              <div className="text-[10px] text-terminal-muted lowercase">
+                {state.hasBidInActiveAuction ? "Your secret bid is secured" : "New asset available. Bids needed."}
+              </div>
+            </div>
+          </div>
+          <button 
+            onClick={() => router.push("/team/auction")}
+            className="btn-amber text-[10px] px-3 py-1.5 font-black"
+          >
+            {state.hasBidInActiveAuction ? "VIEW BIDS →" : "BID NOW →"}
+          </button>
+        </div>
+      )}
+
       {/* Top HUD */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div className="terminal-card text-center">
@@ -205,6 +226,43 @@ export default function GamePage() {
           </div>
         </div>
       </div>
+
+      {/* Powercards & Credits */}
+      {(state.currency > 0 || (state.ownedPowercards && state.ownedPowercards.length > 0)) && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+          <div className="terminal-card md:col-span-1 border-terminal-amber/20 bg-amber-950/5 flex flex-col justify-center items-center py-2">
+             <div className="text-terminal-muted text-[10px] uppercase tracking-tighter mb-1">Available Credits</div>
+             <div className="text-terminal-amber font-mono font-bold text-lg">{state.currency || 0} ₵</div>
+          </div>
+          <div className="terminal-card md:col-span-2 border-terminal-green/20">
+             <div className="text-terminal-muted text-[10px] uppercase tracking-tighter mb-2">Power Inventory</div>
+             <div className="flex flex-wrap gap-3">
+                {state.ownedPowercards && state.ownedPowercards.length > 0 ? (
+                  state.ownedPowercards.map((pc, i) => (
+                    <div key={i} className="group relative flex flex-col items-center gap-1 bg-amber-950/15 border border-terminal-amber/20 rounded p-2 w-28">
+                      {pc.image && (
+                        <img
+                          src={pc.image}
+                          alt={pc.name}
+                          className="w-16 h-16 object-contain rounded"
+                        />
+                      )}
+                      <div className="text-terminal-amber text-[10px] font-bold text-center leading-tight">{pc.name}</div>
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-black border border-terminal-border rounded text-[10px] text-terminal-text opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-xl">
+                        <div className="text-terminal-amber font-bold mb-1">{pc.name}</div>
+                        <div className="text-terminal-muted mb-1 italic text-[9px]">{pc.timing}</div>
+                        {pc.description}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-terminal-muted text-[10px] italic">No active powercards</div>
+                )}
+             </div>
+          </div>
+        </div>
+      )}
 
       {/* Puzzle Card */}
       <div className="terminal-card mb-4">

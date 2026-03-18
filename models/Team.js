@@ -27,6 +27,7 @@ const TeamSchema = new mongoose.Schema(
     // timestamps for login/start — used by admin terminal
     loginTime: { type: Date, default: null },
     assignedPuzzleIds: [{ type: String }],
+    assignedPowercardIds: [{ type: String }],
     currentIndex: { type: Number, default: 0 },
     solvedPuzzleIds: [{ type: String }],
     submissionHistory: [{

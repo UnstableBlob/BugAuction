@@ -123,15 +123,32 @@ export default function AuctionPage() {
                {auctionState.status === "open" ? "LIVE AUCTION: Bidding Open" : "AUCTION CLOSED: Results"}
             </div>
 
-            {/* Puzzle Details */}
+            {/* Item Details */}
             {auctionState.puzzle && (
                <div className="mb-6 p-4 border border-terminal-border bg-black/50 rounded">
-                  <div className="text-terminal-green text-sm uppercase tracking-wider mb-2 font-bold">Priority Target</div>
+                  <div className="text-terminal-green text-sm uppercase tracking-wider mb-2 font-bold">
+                    {auctionState.itemType === 'powercard' ? 'Special Asset: Power Card' : 'Priority Target: Puzzle'}
+                  </div>
+                  {/* Show card image if powercard */}
+                  {auctionState.itemType === 'powercard' && auctionState.puzzle.image && (
+                    <div className="flex justify-center mb-3">
+                      <img
+                        src={auctionState.puzzle.image}
+                        alt={auctionState.puzzle.title}
+                        className="w-32 h-32 object-contain rounded border border-terminal-amber/20"
+                      />
+                    </div>
+                  )}
                   <div className="text-xl font-bold mb-2 text-white">{auctionState.puzzle.title}</div>
                   <div className="flex gap-4 mb-2">
                      <div className="text-[10px] font-bold px-2 py-0.5 bg-green-500/10 text-green-500 border border-green-500/20 rounded uppercase tracking-tighter">
-                        Reward: {auctionState.puzzle.points} PTS
+                        {auctionState.itemType === 'powercard' ? `Cost: ${auctionState.puzzle.points} ₵` : `Reward: ${auctionState.puzzle.points} PTS`}
                      </div>
+                     {auctionState.puzzle.timing && (
+                       <div className="text-[10px] px-2 py-0.5 bg-amber-500/10 text-terminal-amber border border-terminal-amber/20 rounded italic">
+                         {auctionState.puzzle.timing}
+                       </div>
+                     )}
                   </div>
                   <div className="text-terminal-muted text-sm italic">{auctionState.puzzle.prompt}</div>
                </div>
@@ -181,11 +198,11 @@ export default function AuctionPage() {
                      Winning Bid: <span className="text-terminal-amber">{auctionState.winningBid || "0"}</span> coins
                   </div>
                   
-                  {auctionState.winnerTeamName === teamName ? (
-                     <div className="text-terminal-green font-bold glow-text">TARGET ACQUIRED! Puzzle added to your queue.</div>
-                  ) : (
-                     <div className="text-terminal-red">Target lost. Better luck on the next auction.</div>
-                  )}
+             {auctionState.winnerTeamName === teamName ? (
+                <div className="text-terminal-green font-bold glow-text">ASSET ACQUIRED! {auctionState.itemType === 'powercard' ? 'Check your inventory.' : 'Puzzle added to your queue.'}</div>
+             ) : (
+                <div className="text-terminal-red">Asset missed. Better luck on the next auction.</div>
+             )}
                   
                   <div className="mt-6 text-terminal-muted text-xs animate-pulse">Waiting for next auction...</div>
                </div>
